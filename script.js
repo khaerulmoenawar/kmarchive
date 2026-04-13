@@ -852,15 +852,20 @@ class Portfolio {
                 backToTop?.classList.toggle('visible', y > 600);
 
                 if (this.isMobile && header) {
-                const pastHeroMobile = y > 80;
-                if (y > lastY) {
-                    anchorY = y;
-                    if (pastHeroMobile) header.classList.add('nav-hidden');
-                } else {
-                    if (anchorY - y > 60 || y < 60) {
-                        header.classList.remove('nav-hidden');
+                    const pastHeroMobile = y > 80;
+                    const delta = y - lastY;
+                    if (delta > 2 && pastHeroMobile) {
+                        // Definite downward movement — hide and push anchor down
+                        if (y > anchorY) anchorY = y;
+                        header.classList.add('nav-hidden');
+                    } else if (delta < -2) {
+                        // Definite upward movement — only reveal after 80px of intentional drag
+                        if (anchorY - y > 80 || y < 60) {
+                            header.classList.remove('nav-hidden');
+                            anchorY = y; // reset so it doesn't immediately re-hide
+                        }
                     }
-                }
+                    // delta between -2 and +2 = jitter/stopped — do nothing
                 }
 
                 if (categoryNav) {
