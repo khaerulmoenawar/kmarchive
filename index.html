@@ -2,22 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#080808">
     <title>KM's Archive</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Helvetica+Neue:wght@300;400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="cursor" id="cursor">
+    <!-- Custom cursor (desktop only) -->
+    <div class="cursor" id="cursor" aria-hidden="true">
         <div class="cursor-dot"></div>
         <div class="cursor-ring"></div>
         <div class="cursor-label" id="cursorLabel"></div>
     </div>
 
-    <div class="loader" id="loader">
+    <!-- Loading screen -->
+    <div class="loader" id="loader" role="status" aria-label="Loading">
         <div class="loader-inner">
             <div class="loader-logo">KM ARCHIVE'S</div>
             <div class="loader-line">
@@ -26,60 +29,65 @@
             <div class="loader-text" id="loaderText">INITIALIZING ARCHIVE</div>
             <div class="loader-count" id="loaderCount">000</div>
         </div>
-        <div class="loader-corners">
+        <div class="loader-corners" aria-hidden="true">
             <span></span><span></span><span></span><span></span>
         </div>
     </div>
 
-    <div class="noise-overlay"></div>
+    <div class="noise-overlay" aria-hidden="true"></div>
 
-    <div class="ambient-orbs">
+    <div class="ambient-orbs" aria-hidden="true">
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
     </div>
 
-    <div class="audio-player" id="audioPlayer">
-        <div class="audio-visualizer" id="audioViz">
+    <!-- Fixed audio player -->
+    <div class="audio-player" id="audioPlayer" role="region" aria-label="Audio player">
+        <div class="audio-visualizer" id="audioViz" aria-hidden="true">
             <span></span><span></span><span></span><span></span><span></span>
         </div>
-        <button class="audio-btn" id="playBtn" aria-label="Play"><i class="fas fa-play"></i></button>
-        <button class="audio-btn" id="pauseBtn" style="display:none;" aria-label="Pause"><i class="fas fa-pause"></i></button>
+        <button class="audio-btn" id="playBtn" aria-label="Play music"><i class="fas fa-play"></i></button>
+        <button class="audio-btn" id="pauseBtn" style="display:none;" aria-label="Pause music"><i class="fas fa-pause"></i></button>
         <span class="audio-track">Soldier, Poet, King</span>
-        <button class="audio-btn" id="volumeBtn" aria-label="Volume"><i class="fas fa-volume-up"></i></button>
+        <button class="audio-btn" id="volumeBtn" aria-label="Toggle volume"><i class="fas fa-volume-up"></i></button>
     </div>
 
-    <div class="theme-toggle" id="themeToggle" role="button" aria-label="Toggle theme">
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
         <i class="fas fa-moon theme-icon"></i>
-    </div>
+    </button>
 
+    <!-- Back to top -->
     <a href="#home" class="back-to-top" id="backToTop" aria-label="Back to top">
         <i class="fas fa-arrow-up"></i>
     </a>
 
+    <!-- Header -->
     <header class="header" id="header">
-        <div class="header-progress" id="headerProgress"></div>
-        <a href="#home" class="logo">
+        <div class="header-progress" id="headerProgress" aria-hidden="true"></div>
+        <a href="#home" class="logo" aria-label="KM Archive home">
             <span class="logo-km">KM</span>
-            <span class="logo-sep">/</span>
+            <span class="logo-sep" aria-hidden="true">/</span>
             <span class="logo-archive">ARCHIVE</span>
         </a>
-        <nav class="nav" role="navigation">
+        <nav class="nav" id="mainNav" role="navigation" aria-label="Main navigation">
             <div class="nav-links">
-                <a href="#home" class="nav-link active" data-index="01">Home</a>
-                <a href="#writing" class="nav-link" data-index="02">Writing</a>
-                <a href="#photography" class="nav-link" data-index="03">Photography</a>
-                <a href="#design" class="nav-link" data-index="04">Design</a>
-                <a href="#about" class="nav-link" data-index="05">About</a>
+                <a href="#home"        class="nav-link active" data-index="01">Home</a>
+                <a href="#writing"     class="nav-link"        data-index="02">Writing</a>
+                <a href="#photography" class="nav-link"        data-index="03">Photography</a>
+                <a href="#about"       class="nav-link"        data-index="04">About</a>
             </div>
         </nav>
-        <div class="header-time" id="headerTime"></div>
-        </header>
-   
-    <section class="hero" id="home">
-        <canvas class="hero-canvas" id="heroCanvas"></canvas>
+        <div class="header-time" id="headerTime" aria-live="off"></div>
+        <!-- Mobile nav toggle injected by JS -->
+    </header>
+
+    <!-- Hero -->
+    <section class="hero" id="home" aria-label="Hero">
+        <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
         <div class="hero-content">
-            <div class="hero-eyebrow">
+            <div class="hero-eyebrow" aria-hidden="true">
                 <span class="eyebrow-line"></span>
                 <span class="eyebrow-text">CREATIVE ARCHIVE — EST. 2026</span>
             </div>
@@ -88,50 +96,46 @@
                 <em class="hero-word hero-word-italic" data-word="Creative">Creative</em>
                 <span class="hero-word" data-word="ARCHIVE">Archive</span>
             </h1>
-            <p class="hero-subtitle">An immersive collection of Khaerul's creative works spanning multiple disciplines. Each piece represents a deliberate exploration of essential forms, precision, and meaningful reduction in visual and written expression.</p>
+            <p class="hero-subtitle">Through the lens and pen of Khaerul, the chaos of existence finds its clarity. This collection is a deliberate exercise in the art of leaving out—preserving only what is essential for the heart to remember.</p>
             <div class="hero-cta">
-                <a href="#writing" class="cta-btn">Explore Works</a>
-                <span class="hero-count"><em>12</em> Pieces Archived</span>
+                <a href="#writing" class="cta-btn"><span>Explore Works</span></a>
+                <span class="hero-count"><em>15</em> Pieces Archived</span>
             </div>
         </div>
-        <div class="hero-scroll-indicator">
+        <div class="hero-scroll-indicator" aria-hidden="true">
             <div class="scroll-track">
                 <div class="scroll-thumb"></div>
             </div>
             <span>SCROLL</span>
         </div>
-        <div class="hero-index">
+        <div class="hero-index" aria-hidden="true">
             <div class="hero-index-item">Writing <span>11</span></div>
             <div class="hero-index-item">Photography <span>04</span></div>
-            <div class="hero-index-item">Design <span>04</span></div>
         </div>
     </section>
 
-    <div class="category-nav" id="categoryNav">
+    <!-- Category filter nav -->
+    <div class="category-nav" id="categoryNav" role="navigation" aria-label="Content filter">
         <div class="container">
             <div class="category-row">
-                <div class="category-label">FILTER</div>
-                <div class="category-buttons">
+                <div class="category-label" aria-hidden="true">FILTER</div>
+                <div class="category-buttons" role="group" aria-label="Filter by category">
                     <button class="category-btn active" data-category="all">
                         <span class="btn-text">All Works</span>
-                        <span class="btn-count">12</span>
+                        <span class="btn-count" aria-label="15 items">15</span>
                     </button>
                     <button class="category-btn" data-category="writing">
                         <span class="btn-text">Writing</span>
-                        <span class="btn-count">11</span>
+                        <span class="btn-count" aria-label="11 items">11</span>
                     </button>
                     <button class="category-btn" data-category="photography">
                         <span class="btn-text">Photography</span>
-                        <span class="btn-count">04</span>
-                    </button>
-                    <button class="category-btn" data-category="design">
-                        <span class="btn-text">Design</span>
-                        <span class="btn-count">04</span>
+                        <span class="btn-count" aria-label="4 items">04</span>
                     </button>
                 </div>
                 <div class="category-sort">
-                    <span class="sort-label">SORT</span>
-                    <select class="filter-select" id="sortSelect">
+                    <span class="sort-label" id="sort-label">SORT</span>
+                    <select class="filter-select" id="sortSelect" aria-labelledby="sort-label">
                         <option value="date">Date</option>
                         <option value="title">Title</option>
                         <option value="featured">Featured</option>
@@ -141,8 +145,9 @@
         </div>
     </div>
 
-    <section class="gallery-section" id="writing">
-        <div class="section-number">02</div>
+    <!-- Writing section -->
+    <section class="gallery-section" id="writing" aria-label="Writing archive">
+        <div class="section-number" aria-hidden="true">02</div>
         <div class="container">
             <div class="section-header">
                 <div class="section-kicker">WRITTEN WORKS</div>
@@ -150,14 +155,15 @@
                     <span class="section-title-line">Writing</span>
                     <span class="section-title-line section-title-outline">Archive</span>
                 </h2>
-                <p class="section-subtitle">Essays, narratives, and linguistic explorations focused on life and its meaning — each a study in reduction and meaningful composition.</p>
+                <p class="section-subtitle">Linguistic explorations on life and love—distilling the vastness of human experience into its most meaningful forms.</p>
             </div>
-            <div class="gallery-grid writing-gallery"></div>
+            <div class="gallery-grid writing-gallery" role="list"></div>
         </div>
     </section>
 
-    <section class="gallery-section" id="photography">
-        <div class="section-number">03</div>
+    <!-- Photography section -->
+    <section class="gallery-section" id="photography" aria-label="Photography archive">
+        <div class="section-number" aria-hidden="true">03</div>
         <div class="container">
             <div class="section-header">
                 <div class="section-kicker">VISUAL WORKS (works in progress)</div>
@@ -165,29 +171,15 @@
                     <span class="section-title-line">Photography</span>
                     <span class="section-title-line section-title-outline">Archive</span>
                 </h2>
-                <p class="section-subtitle">Visual narratives exploring form, light, and composition — moments of distilled visual clarity across multiple photographic disciplines.</p>
+                <p class="section-subtitle">Visual observations of light and shadow—capturing the random fragments of existence that the heart chooses to remember.</p>
             </div>
-            <div class="gallery-grid photography-gallery"></div>
+            <div class="gallery-grid photography-gallery" role="list"></div>
         </div>
     </section>
 
-    <section class="gallery-section" id="design">
-        <div class="section-number">04</div>
-        <div class="container">
-            <div class="section-header">
-                <div class="section-kicker">DESIGN WORKS (works in progress)</div>
-                <h2 class="section-title">
-                    <span class="section-title-line">Design</span>
-                    <span class="section-title-line section-title-outline">Archive</span>
-                </h2>
-                <p class="section-subtitle">Visual systems, typography, and interface design — essential forms and systematic approaches to visual communication.</p>
-            </div>
-            <div class="gallery-grid design-gallery"></div>
-        </div>
-    </section>
-
-    <section class="gallery-section about-section" id="about">
-        <div class="section-number">05</div>
+    <!-- About section -->
+    <section class="gallery-section about-section" id="about" aria-label="About the archive">
+        <div class="section-number" aria-hidden="true">04</div>
         <div class="container">
             <div class="section-header">
                 <div class="section-kicker">THE MAKER</div>
@@ -199,27 +191,27 @@
             <div class="about-grid">
                 <div class="about-col">
                     <h3 class="about-heading">Philosophy</h3>
-                    <p class="about-text">True creativity emerges through deliberate constraint. By limiting our palette to essential forms and precise language, we create work that is both focused and deeply expressive. This archive documents years of exploration within these constraints.</p>
-                    <p class="about-text">Each piece represents a systematic approach to reduction, where complexity is methodically removed until only the essential remains.</p>
+                    <p class="about-text">True creativity emerges through deliberate constraint. By stripping away the noise of the world, I seek the essential forms of love and life. This archive is a journey of finding clarity within the chaos—proving that the most profound stories are often the simplest ones.</p>
+                    <p class="about-text">Each piece is a return toward the essence—a deliberate shedding of the unnecessary, until only the core truth of a moment remains.</p>
                 </div>
                 <div class="about-col">
                     <h3 class="about-heading">Methodology</h3>
-                    <p class="about-text">Our process follows a rigorous framework of reduction. We begin with complexity, then systematically remove elements through iterative refinement until only what's essential remains — consistently across writing, photography, and design.</p>
-                    <p class="about-text">The archive serves as both documentation of this process and testament to the power of working within deliberate creative constraints.</p>
+                    <p class="about-text">The process is a quiet ritual of distillation. Whether through a lens or a pen, I begin with the complexity of human experience and remove everything but the core truth. What remains is not just a work, but a memory preserved—a testament to the power of seeing what is essential.</p>
+                    <p class="about-text">This archive serves as a record of that journey; a testament to the belief that within deliberate constraints, we find the truest reflection of our shared humanity.</p>
                 </div>
             </div>
             <div class="about-quote">
-                <div class="quote-mark">"</div>
-                <blockquote>Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.</blockquote>
-                <cite>Antoine de Saint-Exupéry</cite>
+                <div class="quote-mark" aria-hidden="true">"</div>
+                <blockquote>The mind forgets, but the heart will always remember. And what is the heart's memory but love itself?</blockquote>
+                <cite>Twan Eng Tan</cite>
             </div>
             <div class="about-stats">
                 <div class="stat-item">
-                    <span class="stat-num">12</span>
+                    <span class="stat-num">15</span>
                     <span class="stat-label">Works Archived</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-num">3</span>
+                    <span class="stat-num">2</span>
                     <span class="stat-label">Disciplines</span>
                 </div>
                 <div class="stat-item">
@@ -230,7 +222,8 @@
         </div>
     </section>
 
-    <div class="modal" id="detailModal" role="dialog" aria-modal="true">
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-backdrop" id="modalBackdrop"></div>
         <div class="modal-content">
             <button class="modal-close" id="modalClose" aria-label="Close">
@@ -240,15 +233,15 @@
                 <div class="modal-media">
                     <div class="modal-image-wrap">
                         <img src="" alt="" class="modal-image" id="modalImage">
-                        <div class="modal-image-overlay"></div>
+                        <div class="modal-image-overlay" aria-hidden="true"></div>
                     </div>
-                    <div class="modal-gallery" id="modalGallery"></div>
+                    <div class="modal-gallery" id="modalGallery" role="list" aria-label="Image gallery"></div>
                 </div>
                 <div class="modal-info-panel">
                     <div class="modal-category-badge" id="modalCategory"></div>
                     <h2 class="modal-title" id="modalTitle"></h2>
-                    <p class="modal-description" id="modalDescription"></p>
-                    <div class="modal-divider"></div>
+                    <div class="modal-description" id="modalDescription"></div>
+                    <div class="modal-divider" aria-hidden="true"></div>
                     <div class="modal-meta-grid">
                         <div class="meta-item">
                             <span class="meta-label">Date Added</span>
@@ -272,9 +265,10 @@
                         </div>
                     </div>
                     <div class="modal-nav-row">
-                        <button class="modal-nav-btn" id="modalPrev"><i class="fas fa-arrow-left"></i> Prev</button>
-                        <button class="modal-nav-btn" id="modalNext">Next <i class="fas fa-arrow-right"></i></button>
+                        <button class="modal-nav-btn" id="modalPrev" aria-label="Previous item"><i class="fas fa-arrow-left"></i> Prev</button>
+                        <button class="modal-nav-btn" id="modalNext" aria-label="Next item">Next <i class="fas fa-arrow-right"></i></button>
                     </div>
+                    <p class="modal-swipe-hint">← swipe to navigate →</p>
                 </div>
             </div>
         </div>
