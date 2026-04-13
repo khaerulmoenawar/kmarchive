@@ -163,7 +163,6 @@ class Portfolio {
         this.isMobile = window.innerWidth <= 768 || !window.matchMedia('(hover: hover)').matches;
         this.isNavOpen = false;
 
-        // Touch state for swipe
         this.touchStartX = 0;
         this.touchStartY = 0;
 
@@ -186,7 +185,6 @@ class Portfolio {
         this.setupTouchGestures();
         if (!this.isMobile) this.tickCursor();
 
-        // Handle resize
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
@@ -197,7 +195,6 @@ class Portfolio {
         });
     }
 
-    // Fix for mobile viewport height (address bar issue)
     setVhVariable() {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -293,7 +290,6 @@ class Portfolio {
         const canvas = document.getElementById('heroCanvas');
         if (!canvas) return;
 
-        // Skip canvas on mobile for performance
         if (this.isMobile) {
             canvas.style.display = 'none';
             return;
@@ -352,7 +348,6 @@ class Portfolio {
             animFrame = requestAnimationFrame(draw);
         };
 
-        // Pause canvas when not visible
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -386,9 +381,7 @@ class Portfolio {
         setInterval(tick, 1000);
     }
 
-    // ── Mobile Navigation ──
     setupMobileNav() {
-        // Inject toggle button if not in HTML
         const header = document.getElementById('header');
         if (!header) return;
 
@@ -410,7 +403,6 @@ class Portfolio {
             document.body.classList.toggle('modal-open', this.isNavOpen);
         });
 
-        // Close nav when link is clicked
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 if (this.isNavOpen) {
@@ -423,7 +415,6 @@ class Portfolio {
         });
     }
 
-    // ── Touch Swipe for Modal ──
     setupTouchGestures() {
         const modal = document.getElementById('detailModal');
         if (!modal) return;
@@ -437,7 +428,6 @@ class Portfolio {
             const dx = e.changedTouches[0].clientX - this.touchStartX;
             const dy = e.changedTouches[0].clientY - this.touchStartY;
 
-            // Only swipe if horizontal movement is dominant
             if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
                 if (dx < 0) this.navigateModal(1);  // swipe left = next
                 else        this.navigateModal(-1); // swipe right = prev
@@ -610,10 +600,8 @@ class Portfolio {
         modal.classList.add('active');
         document.body.classList.add('modal-open');
 
-        // Scroll modal to top on open
         setTimeout(() => { modal.scrollTop = 0; }, 10);
 
-        // Focus trap: focus close button
         setTimeout(() => {
             document.getElementById('modalClose')?.focus();
         }, 100);
@@ -637,7 +625,6 @@ class Portfolio {
         const idx   = items.indexOf(this.currentItem);
         const next  = (idx + dir + items.length) % items.length;
 
-        // Animate out then in
         const content = document.querySelector('.modal-content');
         if (content) {
             content.style.transition = 'transform 0.25s ease, opacity 0.25s';
@@ -730,7 +717,6 @@ class Portfolio {
             requestAnimationFrame(() => setTimeout(() => card.classList.add('visible'), 60));
         });
 
-        // Re-observe new items
         const itemObs = new IntersectionObserver(entries => {
             entries.forEach((entry, i) => {
                 if (!entry.isIntersecting) return;
@@ -743,7 +729,6 @@ class Portfolio {
     }
 
     setupEventListeners() {
-        // Category filter buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -752,7 +737,6 @@ class Portfolio {
             });
         });
 
-        // Nav links
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', e => {
                 e.preventDefault();
@@ -779,13 +763,11 @@ class Portfolio {
             });
         });
 
-        // Modal
         document.getElementById('modalClose')?.addEventListener('click', () => this.closeModal());
         document.getElementById('modalPrev')?.addEventListener('click', () => this.navigateModal(-1));
         document.getElementById('modalNext')?.addEventListener('click', () => this.navigateModal(1));
         document.getElementById('modalBackdrop')?.addEventListener('click', () => this.closeModal());
 
-        // Keyboard
         document.addEventListener('keydown', e => {
             const modal = document.getElementById('detailModal');
             if (!modal?.classList.contains('active')) return;
@@ -794,10 +776,8 @@ class Portfolio {
             if (e.key === 'ArrowRight') this.navigateModal(1);
         });
 
-        // Theme
         document.getElementById('themeToggle')?.addEventListener('click', () => this.toggleTheme());
 
-        // Back to top
         document.getElementById('backToTop')?.addEventListener('click', e => {
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -806,7 +786,6 @@ class Portfolio {
 
     filterGalleries(category) {
         document.querySelectorAll('.gallery-section').forEach(section => {
-            // Always show about section
             if (section.id === 'about') return;
 
             const show = category === 'all' || section.id === category;

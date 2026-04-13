@@ -12,14 +12,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Custom cursor (desktop only) -->
     <div class="cursor" id="cursor" aria-hidden="true">
         <div class="cursor-dot"></div>
         <div class="cursor-ring"></div>
         <div class="cursor-label" id="cursorLabel"></div>
     </div>
 
-    <!-- Loading screen -->
     <div class="loader" id="loader" role="status" aria-label="Loading">
         <div class="loader-inner">
             <div class="loader-logo">KM ARCHIVE'S</div>
@@ -42,7 +40,6 @@
         <div class="orb orb-3"></div>
     </div>
 
-    <!-- Fixed audio player -->
     <div class="audio-player" id="audioPlayer" role="region" aria-label="Audio player">
         <div class="audio-visualizer" id="audioViz" aria-hidden="true">
             <span></span><span></span><span></span><span></span><span></span>
@@ -53,17 +50,14 @@
         <button class="audio-btn" id="volumeBtn" aria-label="Toggle volume"><i class="fas fa-volume-up"></i></button>
     </div>
 
-    <!-- Theme toggle -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
         <i class="fas fa-moon theme-icon"></i>
     </button>
 
-    <!-- Back to top -->
     <a href="#home" class="back-to-top" id="backToTop" aria-label="Back to top">
         <i class="fas fa-arrow-up"></i>
     </a>
 
-    <!-- Header -->
     <header class="header" id="header">
         <div class="header-progress" id="headerProgress" aria-hidden="true"></div>
         <a href="#home" class="logo" aria-label="KM Archive home">
@@ -80,10 +74,8 @@
             </div>
         </nav>
         <div class="header-time" id="headerTime" aria-live="off"></div>
-        <!-- Mobile nav toggle injected by JS -->
     </header>
 
-    <!-- Hero -->
     <section class="hero" id="home" aria-label="Hero">
         <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
         <div class="hero-content">
@@ -114,7 +106,6 @@
         </div>
     </section>
 
-    <!-- Category filter nav -->
     <div class="category-nav" id="categoryNav" role="navigation" aria-label="Content filter">
         <div class="container">
             <div class="category-row">
@@ -145,7 +136,6 @@
         </div>
     </div>
 
-    <!-- Writing section -->
     <section class="gallery-section" id="writing" aria-label="Writing archive">
         <div class="section-number" aria-hidden="true">02</div>
         <div class="container">
@@ -161,7 +151,6 @@
         </div>
     </section>
 
-    <!-- Photography section -->
     <section class="gallery-section" id="photography" aria-label="Photography archive">
         <div class="section-number" aria-hidden="true">03</div>
         <div class="container">
@@ -177,7 +166,6 @@
         </div>
     </section>
 
-    <!-- About section -->
     <section class="gallery-section about-section" id="about" aria-label="About the archive">
         <div class="section-number" aria-hidden="true">04</div>
         <div class="container">
@@ -221,8 +209,7 @@
             </div>
         </div>
     </section>
-
-    <!-- Detail Modal -->
+>
     <div class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-backdrop" id="modalBackdrop"></div>
         <div class="modal-content">
