@@ -855,14 +855,12 @@ class Portfolio {
                     const pastHeroMobile = y > 80;
                     const delta = y - lastY;
                     if (delta > 2 && pastHeroMobile) {
-                        // Definite downward movement — hide and push anchor down
                         if (y > anchorY) anchorY = y;
                         header.classList.add('nav-hidden');
                     } else if (delta < -2) {
-                        // Definite upward movement — only reveal after 80px of intentional drag
                         if (anchorY - y > 80 || y < 60) {
                             header.classList.remove('nav-hidden');
-                            anchorY = y; // reset so it doesn't immediately re-hide
+                            anchorY = y;
                         }
                     }
                     // delta between -2 and +2 = jitter/stopped — do nothing
@@ -870,8 +868,14 @@ class Portfolio {
 
                 if (categoryNav) {
                     const pastHero = y > window.innerHeight * 0.7;
-                    const scrollingDown = y > lastY + 5;
-                    categoryNav.classList.toggle('hidden', pastHero && scrollingDown);
+                    const delta = y - lastY;
+                    // Same dead-zone logic: only toggle on meaningful movement
+                    if (delta > 2 && pastHero) {
+                        categoryNav.classList.add('hidden');
+                    } else if (delta < -2 || !pastHero) {
+                        categoryNav.classList.remove('hidden');
+                    }
+                    // delta between -2 and +2 = do nothing
                 }
 
                 lastY = y;
