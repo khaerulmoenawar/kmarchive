@@ -837,6 +837,7 @@ class Portfolio {
         const categoryNav = document.getElementById('categoryNav');
 
         let lastY = window.scrollY;
+        let anchorY = window.scrollY;
         let ticking = false;
 
         window.addEventListener('scroll', () => {
@@ -851,14 +852,15 @@ class Portfolio {
                 backToTop?.classList.toggle('visible', y > 600);
 
                 if (this.isMobile && header) {
-                    const scrollingDown = y > lastY + 4;
-                    const scrollingUp   = y < lastY - 4;
-                    const pastHeroMobile = y > 80;
-                    if (pastHeroMobile && scrollingDown) {
-                        header.classList.add('nav-hidden');
-                    } else if (scrollingUp || y < 60) {
+                const pastHeroMobile = y > 80;
+                if (y > lastY) {
+                    anchorY = y;
+                    if (pastHeroMobile) header.classList.add('nav-hidden');
+                } else {
+                    if (anchorY - y > 60 || y < 60) {
                         header.classList.remove('nav-hidden');
                     }
+                }
                 }
 
                 if (categoryNav) {
