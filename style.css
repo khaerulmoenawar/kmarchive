@@ -115,11 +115,6 @@ body.modal-open { overflow: hidden; }
     .orb-1 { width: 350px; height: 350px; }
     .orb-2 { width: 250px; height: 250px; }
     .orb-3 { width: 300px; height: 300px; }
-    
-    .gallery-section {
-        opacity: 1 !important;
-        transform: none !important;
-  }
 }
 
 @keyframes orbFloat {
@@ -502,7 +497,7 @@ body.light-mode .filter-select { background-color: var(--bg); }
 
 .gallery-section {
     padding: 180px 0; border-bottom: 1px solid var(--white-faint); position: relative;
-    opacity: 0; transform: translateY(60px);
+    opacity: 1; transform: translateY(60px);
     transition: opacity 1.2s var(--ease-expo), transform 1.2s var(--ease-expo);
 }
 
