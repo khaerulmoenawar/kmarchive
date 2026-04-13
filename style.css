@@ -117,8 +117,8 @@ body.modal-open { overflow: hidden; }
     .orb-3 { width: 300px; height: 300px; }
     
     .gallery-section {
-    opacity: 1;
-    transform: none;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 
