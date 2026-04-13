@@ -551,6 +551,7 @@ class Portfolio {
     
     document.querySelectorAll('.gallery-item').forEach(el => itemObs.observe(el));
     }
+    
     openModal(item) {
         this.currentItem = item;
 
@@ -786,7 +787,6 @@ class Portfolio {
 
     filterGalleries(category) {
         document.querySelectorAll('.gallery-section').forEach(section => {
-            if (section.id === 'about') return;
 
             const show = category === 'all' || section.id === category;
 
@@ -894,3 +894,9 @@ class Portfolio {
 document.addEventListener('DOMContentLoaded', () => {
     new Portfolio();
 });
+
+if (window.innerWidth <= 768) {
+    document.querySelectorAll('.gallery-section').forEach(sec => {
+        sec.classList.add('active');
+    });
+}
