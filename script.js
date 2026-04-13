@@ -109,7 +109,7 @@ const portfolioData = {
             date: "October 2023",
             category: "Architecture",
             type: "Photographic Series",
-            featured: true
+            featured: false
         },
         {
             id: "PH-2023-002",
@@ -129,7 +129,7 @@ const portfolioData = {
             date: "June 2023",
             category: "Nature",
             type: "Portrait Series",
-            featured: true
+            featured: false
         },
         {
             id: "PH-2023-004",
