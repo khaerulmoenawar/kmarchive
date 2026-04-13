@@ -852,30 +852,21 @@ class Portfolio {
                 backToTop?.classList.toggle('visible', y > 600);
 
                 if (this.isMobile && header) {
-                    const pastHeroMobile = y > 80;
-                    const delta = y - lastY;
-                    if (delta > 2 && pastHeroMobile) {
-                        if (y > anchorY) anchorY = y;
-                        header.classList.add('nav-hidden');
-                    } else if (delta < -2) {
-                        if (anchorY - y > 80 || y < 60) {
-                            header.classList.remove('nav-hidden');
-                            anchorY = y;
-                        }
+                const pastHeroMobile = y > 80;
+                if (y > lastY) {
+                    anchorY = y;
+                    if (pastHeroMobile) header.classList.add('nav-hidden');
+                } else {
+                    if (anchorY - y > 60 || y < 60) {
+                        header.classList.remove('nav-hidden');
                     }
-                    // delta between -2 and +2 = jitter/stopped — do nothing
+                }
                 }
 
                 if (categoryNav) {
                     const pastHero = y > window.innerHeight * 0.7;
-                    const delta = y - lastY;
-                    // Same dead-zone logic: only toggle on meaningful movement
-                    if (delta > 2 && pastHero) {
-                        categoryNav.classList.add('hidden');
-                    } else if (delta < -2 || !pastHero) {
-                        categoryNav.classList.remove('hidden');
-                    }
-                    // delta between -2 and +2 = do nothing
+                    const scrollingDown = y > lastY + 5;
+                    categoryNav.classList.toggle('hidden', pastHero && scrollingDown);
                 }
 
                 lastY = y;
