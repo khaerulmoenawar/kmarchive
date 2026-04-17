@@ -467,8 +467,8 @@ class Portfolio {
             const dy = e.changedTouches[0].clientY - this.touchStartY;
 
             if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
-                if (dx < 0) this.navigateModal(1);  // swipe left = next
-                else        this.navigateModal(-1); // swipe right = prev
+                if (dx < 0) this.navigateModal(1);
+                else        this.navigateModal(-1);
             }
         }, { passive: true });
     }
@@ -528,12 +528,7 @@ class Portfolio {
 
     getFallback(index) {
         const fallbacks = [
-            'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80',
+            'images/HUMAN.png',
         ];
         return fallbacks[(index || 0) % fallbacks.length];
     }
@@ -547,7 +542,10 @@ class Portfolio {
         const imgSrc = item.images[0];
         const isLocal = !imgSrc.startsWith('http');
         const fallback = this.getFallback(0);
-        const photoCount = item.images.length;
+        const hostedImages = item.images.filter(src => src.startsWith('http'));
+        const allLocal     = item.images.every(src => !src.startsWith('http'));
+        const showBadge    = !allLocal && hostedImages.length > 1;
+        const badgeCount   = hostedImages.length;
 
         el.innerHTML = `
             <div class="item-image-container">
@@ -565,7 +563,7 @@ class Portfolio {
                     <div class="item-title">${item.title}</div>
                     <div class="item-date">${item.date}</div>
                 </div>
-                ${photoCount > 1 ? `<div class="item-photo-count"><i class="fas fa-images"></i> ${photoCount}</div>` : ''}
+                ${showBadge ? `<div class="item-photo-count"><i class="fas fa-images"></i> ${badgeCount}</div>` : ''}
                 <div class="item-view"><i class="fas fa-arrow-up-right-from-square"></i></div>
             </div>
         `;
@@ -628,7 +626,11 @@ class Portfolio {
 
             const gallery = document.getElementById('modalGallery');
             gallery.innerHTML = '';
-            item.images.forEach((src, i) => {
+            const allLocal = item.images.every(src => !src.startsWith('http'));
+            const imagesToShow = allLocal
+                ? item.images
+                : item.images;
+            imagesToShow.forEach((src, i) => {
                 const thumb = document.createElement('div');
                 thumb.className = `modal-gallery-item${i === 0 ? ' active' : ''}`;
                 const isL = !src.startsWith('http');

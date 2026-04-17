@@ -844,7 +844,8 @@ body.light-mode .modal-backdrop { background: rgba(245,245,240,0.97); }
 .modal-category-badge::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
 
 .modal-title { font-family: var(--font-display); font-size: clamp(28px, 3vw, 52px); font-weight: 300; line-height: 1.1; margin-bottom: 24px; }
-.modal-description { font-size: 15px; font-weight: 300; color: var(--white-dim); line-height: 1.85; flex: 1; }
+.modal-description { font-size: 15px; font-weight: 300; color: var(--white-dim); line-height: 1.85; flex: 1; overflow-y: auto; max-height: 280px; scrollbar-width: thin; scrollbar-color: var(--gray-b) transparent; padding-right: 4px; }
+.modal-body.writing-modal .modal-description { max-height: none; overflow-y: visible; padding-right: 0; }
 
 .modal-divider { width: 40px; height: 1px; background: var(--accent); margin: 32px 0; }
 
