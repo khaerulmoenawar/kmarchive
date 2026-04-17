@@ -130,8 +130,7 @@ const portfolioData = {
                 "UNC2.png",
                 "UNC3.png",
                 "UNC4.png",
-                "UNC5.png",
-                "UNC6.png"
+                "UNC5.png"
             ],
             date: "April 2026",
             category: "Unconceptual",
