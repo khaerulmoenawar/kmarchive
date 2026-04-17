@@ -108,7 +108,7 @@ const portfolioData = {
         {
             id: "PH-2026-001",
             title: "Architectural Obscura",
-            description: "A series exploring architectural minimalism through light and shadow. Each photograph captures the essential forms of brutalist and modernist structures.",
+            description: "Not what is seen, but what is left unseen. These photographs strip architecture down to its bones — light falling like a blade, shadows that breathe, concrete turned into quiet poetry. No people. No context. Just geometry, patience, and the weight of empty space.",
             images: [
                 "ARCH.png",
                 "ARCH2.png",
@@ -124,7 +124,7 @@ const portfolioData = {
         {
             id: "PH-2026-002",
             title: "Unconceptual Realities",
-            description: "Photographic studies of emptiness and presence. This series explores how negative space defines form, using vast landscapes and intimate interiors.",
+            description: "What happens when meaning steps aside? This series wanders into the gap between intention and accident. Landscapes without a center. Interiors that feel like memories you never had. Nothing here tries to be profound — and that is exactly why it is.",
             images: [
                 "UNC.png",
                 "UNC2.png",
@@ -141,7 +141,7 @@ const portfolioData = {
         {
             id: "PH-2026-003",
             title: "Nature's Essence",
-            description: "Minimalist portraits that focus on essential human expression. Stripped of color and context, these images reveal the universal language of emotion.",
+            description: "Forget the grand horizon. Here, nature is reduced to its quietest language — a single leaf, a breath of wind, the way light touches moss. No spectacle. No cliché. Just the soft, unspoken conversation between the earth and those who still know how to listen.",
             images: [
                 "NATURE.png",
                 "NATURE2.png",
@@ -161,7 +161,7 @@ const portfolioData = {
         {
             id: "PH-2026-004",
             title: "Human Void",
-            description: "An exploration of a necessary space for atoms to move, thereby enabling the existence of matter.",
+            description: "We are not our faces. We are the space around them. These portraits erase everything except presence itself — a shoulder, a silence, a shape where someone used to be. The body becomes architecture. The void becomes the story.",
             images: [
                 "HUMAN.png",
                 "HUMAN2.png",
