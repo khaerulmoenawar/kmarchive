@@ -119,7 +119,7 @@ const portfolioData = {
             date: "April 2026",
             category: "Architecture",
             type: "Building Scapes",
-            featured: false
+            featured: true
         },
         {
             id: "PH-2026-002",
@@ -136,7 +136,7 @@ const portfolioData = {
             date: "April 2026",
             category: "Unconceptual",
             type: "Unconceptual Explorations",
-            featured: false
+            featured: true
         },
         {
             id: "PH-2026-003",
@@ -156,7 +156,7 @@ const portfolioData = {
             date: "April 2026",
             category: "Nature",
             type: "Nature Wonders",
-            featured: false
+            featured: true
         },
         {
             id: "PH-2026-004",
@@ -176,7 +176,7 @@ const portfolioData = {
             date: "April 2026",
             category: "Human",
             type: "The Void",
-            featured: false
+            featured: true
         }
     ],
 };
