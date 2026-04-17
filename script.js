@@ -1,5 +1,5 @@
 const portfolioData = {
-    writing: [
+    eloquentia: [
         {
             id: "WR-2023-001",
             title: "love is a verb",
@@ -184,7 +184,7 @@ class Portfolio {
     constructor() {
         this.currentItem = null;
         this.allItems = [
-            ...portfolioData.writing,
+            ...portfolioData.eloquentia,
             ...portfolioData.lucentia,
         ];
         this.audio = new Audio('SPK.mp3');
@@ -306,8 +306,8 @@ class Portfolio {
         };
 
         addHover('a, button, .category-btn, .filter-select, .theme-toggle, .back-to-top, .audio-player');
-        addHover('.gallery-item:not(.writing-entry)', 'VIEW');
-        addHover('.writing-entry', 'READ');
+        addHover('.gallery-item:not(.eloquentia-entry)', 'VIEW');
+        addHover('.eloquentia-entry', 'READ');
     }
 
     tickCursor() {
@@ -472,9 +472,9 @@ class Portfolio {
     }
 
     initGalleries() {
-        const writingGrid = document.querySelector('.writing-gallery');
+        const writingGrid = document.querySelector('.eloquentia-gallery');
         if (writingGrid) {
-            portfolioData.writing.forEach((item, i) => {
+            portfolioData.eloquentia.forEach((item, i) => {
                 writingGrid.appendChild(this.createWritingEntry(item, i));
             });
         }
@@ -490,8 +490,8 @@ class Portfolio {
 
     createWritingEntry(item, index) {
         const el = document.createElement('div');
-        el.className = 'gallery-item writing-entry';
-        el.dataset.category = 'writing';
+        el.className = 'gallery-item eloquentia-entry';
+        el.dataset.category = 'eloquentia';
         el.dataset.id = item.id;
 
         const num = String(index + 1).padStart(3, '0');
@@ -605,12 +605,12 @@ class Portfolio {
 
         const modal     = document.getElementById('detailModal');
         const modalBody = modal.querySelector('.modal-body');
-        const isWriting = portfolioData.writing.includes(item);
+        const isWriting = portfolioData.eloquentia.includes(item);
 
         if (isWriting) {
-            modalBody.classList.add('writing-modal');
+            modalBody.classList.add('eloquentia-modal');
         } else {
-            modalBody.classList.remove('writing-modal');
+            modalBody.classList.remove('eloquentia-modal');
             const modalImage = document.getElementById('modalImage');
             const isLocal = !item.images[0].startsWith('http');
             modalImage.src = item.images[0];
@@ -689,7 +689,7 @@ class Portfolio {
         if (!this.currentItem) return;
 
         let cat = '';
-        if (portfolioData.writing.includes(this.currentItem))          cat = 'writing';
+        if (portfolioData.eloquentia.includes(this.currentItem))          cat = 'eloquentia';
         else if (portfolioData.lucentia.includes(this.currentItem)) cat = 'lucentia';
         if (!cat) return;
 
@@ -767,13 +767,13 @@ class Portfolio {
             return 0;
         });
 
-        document.querySelectorAll('.writing-gallery, .lucentia-gallery').forEach(g => {
+        document.querySelectorAll('.eloquentia-gallery, .lucentia-gallery').forEach(g => {
             if (g) g.innerHTML = '';
         });
 
         sorted.forEach((item) => {
             let cat = '';
-            if (portfolioData.writing.includes(item))          cat = 'writing';
+            if (portfolioData.eloquentia.includes(item))          cat = 'eloquentia';
             else if (portfolioData.lucentia.includes(item)) cat = 'lucentia';
             if (!cat) return;
 
@@ -781,7 +781,7 @@ class Portfolio {
             if (!grid) return;
 
             const catIdx = portfolioData[cat].indexOf(item);
-            const card = cat === 'writing'
+            const card = cat === 'eloquentia'
                 ? this.createWritingEntry(item, catIdx)
                 : this.createCard(item, cat);
 
@@ -826,7 +826,7 @@ class Portfolio {
                     });
                 } else if (target) {
                     const cat = href.slice(1);
-                    this.filterGalleries(cat === 'writing' || cat === 'lucentia' ? cat : 'all');
+                    this.filterGalleries(cat === 'eloquentia' || cat === 'lucentia' ? cat : 'all');
                     document.querySelectorAll('.category-btn').forEach(b => {
                         b.classList.toggle('active', b.dataset.category === (cat === 'about' ? 'all' : cat));
                     });
@@ -984,3 +984,326 @@ if (window.innerWidth <= 768) {
         sec.classList.add('active');
     });
 }
+
+/* ============================================================
+   FULLSCREEN LIGHTBOX
+   ============================================================ */
+class Lightbox {
+    constructor() {
+        this.el       = document.getElementById('lightbox');
+        this.imgWrap  = document.getElementById('lbImgWrap');
+        this.img      = document.getElementById('lbImg');
+        this.title    = document.getElementById('lbTitle');
+        this.counter  = document.getElementById('lbCounter');
+        this.zoomHint = document.getElementById('lbZoomHint');
+
+        this.images   = [];
+        this.index    = 0;
+        this.isOpen   = false;
+
+        // Zoom / pan state
+        this.scale    = 1;
+        this.panX     = 0;
+        this.panY     = 0;
+        this.isDragging = false;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+        this.lastPanX = 0;
+        this.lastPanY = 0;
+        this.zoomHintTimer = null;
+
+        // Touch
+        this.touchStartX  = 0;
+        this.touchStartY  = 0;
+        this.touchLastDist = 0;
+        this.touchPinching = false;
+
+        this._bind();
+    }
+
+    _bind() {
+        // Close buttons
+        document.getElementById('lbClose')?.addEventListener('click', () => this.close());
+        document.getElementById('lbBackdrop')?.addEventListener('click', () => this.close());
+
+        // Nav
+        document.getElementById('lbPrev')?.addEventListener('click', () => this.navigate(-1));
+        document.getElementById('lbNext')?.addEventListener('click', () => this.navigate(1));
+
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (!this.isOpen) return;
+            if (e.key === 'Escape')      this.close();
+            if (e.key === 'ArrowLeft')   this.navigate(-1);
+            if (e.key === 'ArrowRight')  this.navigate(1);
+            if (e.key === '+' || e.key === '=') this._zoomStep(0.3);
+            if (e.key === '-')           this._zoomStep(-0.3);
+            if (e.key === '0')           this._resetZoom();
+        });
+
+        // Mouse zoom (click to toggle)
+        this.imgWrap.addEventListener('click', e => {
+            if (this.isDragging) return;
+            if (this.scale > 1) {
+                this._resetZoom();
+            } else {
+                this._zoomToPoint(e.clientX, e.clientY, 2.5);
+            }
+        });
+
+        // Mouse wheel zoom
+        this.imgWrap.addEventListener('wheel', e => {
+            e.preventDefault();
+            const delta = e.deltaY < 0 ? 0.18 : -0.18;
+            this._zoomStep(delta, e.clientX, e.clientY);
+        }, { passive: false });
+
+        // Mouse drag for panning
+        this.imgWrap.addEventListener('mousedown', e => {
+            if (this.scale <= 1) return;
+            this.isDragging = true;
+            this.dragStartX = e.clientX - this.panX;
+            this.dragStartY = e.clientY - this.panY;
+            this.imgWrap.classList.add('lb-zoomed');
+        });
+        document.addEventListener('mousemove', e => {
+            if (!this.isDragging) return;
+            this.panX = e.clientX - this.dragStartX;
+            this.panY = e.clientY - this.dragStartY;
+            this._applyTransform(false);
+        });
+        document.addEventListener('mouseup', () => {
+            if (!this.isDragging) return;
+            setTimeout(() => { this.isDragging = false; }, 10);
+        });
+
+        // Touch events
+        this.el.addEventListener('touchstart', e => this._onTouchStart(e), { passive: false });
+        this.el.addEventListener('touchmove',  e => this._onTouchMove(e),  { passive: false });
+        this.el.addEventListener('touchend',   e => this._onTouchEnd(e),   { passive: false });
+    }
+
+    // ── Public: open with an array of image srcs, start at index ──
+    open(images, index, seriesTitle) {
+        this.images      = images;
+        this.index       = index;
+        this.seriesTitle = seriesTitle || '';
+        this._load(this.index);
+
+        this._resetZoom(false);
+        this.el.classList.add('lb-visible');
+        document.body.classList.add('lb-open');
+        this.isOpen = true;
+
+        // Show mobile swipe hint once
+        if (!this._swipeHintShown && window.innerWidth <= 768 && images.length > 1) {
+            this._swipeHintShown = true;
+            const hint = document.createElement('div');
+            hint.className = 'lb-swipe-hint';
+            hint.textContent = '← SWIPE TO NAVIGATE →';
+            this.el.appendChild(hint);
+            setTimeout(() => hint.remove(), 5000);
+        }
+    }
+
+    close() {
+        this.el.classList.remove('lb-visible');
+        document.body.classList.remove('lb-open');
+        this.isOpen = false;
+        this._resetZoom(false);
+        setTimeout(() => { this.img.src = ''; }, 500);
+    }
+
+    navigate(dir) {
+        if (this.images.length <= 1) return;
+        this._resetZoom(false);
+
+        // Slide-out animation
+        const slideOut = dir > 0 ? '-60px' : '60px';
+        this.img.style.transition = 'transform 0.22s ease, opacity 0.22s';
+        this.img.style.transform  = `scale(0.94) translateX(${slideOut})`;
+        this.img.style.opacity    = '0';
+
+        setTimeout(() => {
+            this.index = (this.index + dir + this.images.length) % this.images.length;
+            this._load(this.index);
+            // Slide in from opposite
+            this.img.style.transition = 'none';
+            this.img.style.transform  = `scale(0.94) translateX(${dir > 0 ? '60px' : '-60px'})`;
+            requestAnimationFrame(() => {
+                this.img.style.transition = 'transform 0.4s cubic-bezier(0.19,1,0.22,1), opacity 0.4s cubic-bezier(0.19,1,0.22,1)';
+                this.img.style.transform  = 'scale(1) translateX(0)';
+                this.img.style.opacity    = '1';
+            });
+        }, 220);
+    }
+
+    _load(idx) {
+        const src = this.images[idx];
+        this.img.src = src;
+        this.img.alt = `${this.seriesTitle} — ${idx + 1}`;
+
+        this.title.textContent   = this.seriesTitle;
+        this.counter.textContent = `${String(idx + 1).padStart(2,'0')} / ${String(this.images.length).padStart(2,'0')}`;
+
+        // Show prev/next only if multiple images
+        const showNav = this.images.length > 1;
+        document.getElementById('lbPrev').style.display = showNav ? '' : 'none';
+        document.getElementById('lbNext').style.display = showNav ? '' : 'none';
+    }
+
+    // ── Zoom helpers ──
+    _zoomStep(delta, cx, cy) {
+        const newScale = Math.min(Math.max(this.scale + delta, 1), 5);
+        if (newScale === this.scale) return;
+        if (cx !== undefined) {
+            // Zoom toward cursor
+            const rect = this.img.getBoundingClientRect();
+            const ox = cx - (rect.left + rect.width  / 2);
+            const oy = cy - (rect.top  + rect.height / 2);
+            const ratio = newScale / this.scale;
+            this.panX = cx - (rect.left + rect.width/2) - ox * ratio;
+            this.panY = cy - (rect.top  + rect.height/2) - oy * ratio;
+        }
+        this.scale = newScale;
+        if (this.scale <= 1) { this.panX = 0; this.panY = 0; this.scale = 1; }
+        this.imgWrap.classList.toggle('lb-zoomed', this.scale > 1);
+        this._applyTransform(true);
+        this._showZoomHint();
+    }
+
+    _zoomToPoint(cx, cy, targetScale) {
+        const rect = this.img.getBoundingClientRect();
+        const ratio = targetScale / this.scale;
+        this.panX = (cx - (rect.left + rect.width/2))  * (1 - ratio);
+        this.panY = (cy - (rect.top  + rect.height/2)) * (1 - ratio);
+        this.scale = targetScale;
+        this.imgWrap.classList.add('lb-zoomed');
+        this._applyTransform(true);
+        this._showZoomHint();
+    }
+
+    _resetZoom(animate = true) {
+        this.scale = 1; this.panX = 0; this.panY = 0;
+        this.imgWrap.classList.remove('lb-zoomed');
+        // Let CSS handle the transition when animate=true
+        if (!animate) {
+            this.imgWrap.style.transition = 'none';
+            this.imgWrap.style.transform  = 'translate(0,0) scale(1)';
+            requestAnimationFrame(() => { this.imgWrap.style.transition = ''; });
+        } else {
+            this._applyTransform(true);
+        }
+    }
+
+    _applyTransform(smooth) {
+        this.imgWrap.style.transition = smooth
+            ? 'transform 0.35s cubic-bezier(0.19,1,0.22,1)'
+            : 'none';
+        this.imgWrap.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.scale})`;
+    }
+
+    _showZoomHint() {
+        const pct = Math.round(this.scale * 100);
+        this.zoomHint.textContent = `${pct}%`;
+        this.zoomHint.classList.add('lb-hint-visible');
+        clearTimeout(this.zoomHintTimer);
+        this.zoomHintTimer = setTimeout(() => {
+            this.zoomHint.classList.remove('lb-hint-visible');
+        }, 1200);
+    }
+
+    // ── Touch ──
+    _onTouchStart(e) {
+        if (e.touches.length === 2) {
+            this.touchPinching  = true;
+            this.touchLastDist  = this._pinchDist(e.touches);
+        } else if (e.touches.length === 1) {
+            this.touchPinching  = false;
+            this.touchStartX    = e.touches[0].clientX;
+            this.touchStartY    = e.touches[0].clientY;
+            if (this.scale > 1) {
+                this.dragStartX = e.touches[0].clientX - this.panX;
+                this.dragStartY = e.touches[0].clientY - this.panY;
+            }
+        }
+    }
+
+    _onTouchMove(e) {
+        if (e.touches.length === 2 && this.touchPinching) {
+            e.preventDefault();
+            const dist  = this._pinchDist(e.touches);
+            const delta = (dist - this.touchLastDist) * 0.012;
+            this.touchLastDist = dist;
+            const mid = this._pinchMid(e.touches);
+            this._zoomStep(delta, mid.x, mid.y);
+        } else if (e.touches.length === 1 && this.scale > 1) {
+            e.preventDefault();
+            this.panX = e.touches[0].clientX - this.dragStartX;
+            this.panY = e.touches[0].clientY - this.dragStartY;
+            this._applyTransform(false);
+        }
+    }
+
+    _onTouchEnd(e) {
+        if (this.touchPinching && e.touches.length < 2) {
+            this.touchPinching = false;
+            if (this.scale < 1.1) this._resetZoom();
+            return;
+        }
+        if (e.changedTouches.length === 1 && this.scale <= 1) {
+            const dx = e.changedTouches[0].clientX - this.touchStartX;
+            const dy = Math.abs(e.changedTouches[0].clientY - this.touchStartY);
+            if (Math.abs(dx) > 48 && dy < 80) {
+                this.navigate(dx < 0 ? 1 : -1);
+            }
+        }
+    }
+
+    _pinchDist(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.hypot(dx, dy);
+    }
+
+    _pinchMid(touches) {
+        return {
+            x: (touches[0].clientX + touches[1].clientX) / 2,
+            y: (touches[0].clientY + touches[1].clientY) / 2,
+        };
+    }
+}
+
+// ── Wire up Lightbox to the Portfolio modal image ──
+document.addEventListener('DOMContentLoaded', () => {
+    const lb = new Lightbox();
+
+    // Hook: whenever the modal image is clicked, open lightbox
+    document.getElementById('modalImage')?.addEventListener('click', () => {
+        // Find which item is currently in the modal via the global Portfolio instance
+        const modal = document.getElementById('detailModal');
+        if (!modal.classList.contains('active')) return;
+
+        // Collect images from the currently active thumbnail gallery
+        const thumbs = Array.from(document.querySelectorAll('.modal-gallery-item img'));
+        const images = thumbs.length
+            ? thumbs.map(img => img.src)
+            : [document.getElementById('modalImage').src];
+
+        // Find which thumbnail is active = current index
+        const activeThumb = document.querySelector('.modal-gallery-item.active img');
+        const currentSrc  = document.getElementById('modalImage').src;
+        let startIdx = images.findIndex(s => s === currentSrc);
+        if (startIdx < 0) startIdx = 0;
+
+        // Get series title from modal
+        const seriesTitle = document.getElementById('modalTitle')?.textContent || '';
+        lb.open(images, startIdx, seriesTitle);
+    });
+
+    // Also wire gallery thumbnails — clicking a thumb then clicking the main image should be in sync
+    // We re-use the existing thumbnail click logic — no changes needed there.
+
+    // Expose lb globally so Portfolio can call lb.open() directly if needed
+    window._km_lightbox = lb;
+});
