@@ -581,6 +581,21 @@ body.light-mode .filter-select { background-color: var(--bg); }
 .item-title { font-family: var(--font-display); font-size: 26px; font-weight: 300; line-height: 1.2; margin-bottom: 8px; color: var(--white); }
 .item-date { font-family: var(--font-mono); font-size: 9px; letter-spacing: 3px; color: var(--gray-a); }
 
+
+/* Photo count badge */
+.item-photo-count {
+    position: absolute; bottom: 56px; right: 16px; z-index: 3;
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(8,8,8,0.55); backdrop-filter: blur(6px);
+    border: 1px solid rgba(245,245,240,0.18); border-radius: 20px;
+    padding: 4px 10px; font-family: var(--font-mono); font-size: 10px;
+    color: rgba(245,245,240,0.85); letter-spacing: 0.06em;
+    opacity: 0; transform: translateY(4px);
+    transition: opacity 0.35s, transform 0.35s var(--ease-expo);
+}
+.gallery-item:hover .item-photo-count { opacity: 1; transform: translateY(0); }
+@media (hover: none) { .item-photo-count { opacity: 1; transform: translateY(0); } }
+
 .item-view {
     position: absolute; top: 20px; right: 20px; z-index: 3;
     width: 40px; height: 40px; border: 1px solid rgba(245,245,240,0.25); border-radius: 50%;

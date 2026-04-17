@@ -106,43 +106,78 @@ const portfolioData = {
     ],
     photography: [
         {
-            id: "PH-2023-001",
-            title: "Building Forms",
+            id: "PH-2026-001",
+            title: "Architectural Obscura",
             description: "A series exploring architectural minimalism through light and shadow. Each photograph captures the essential forms of brutalist and modernist structures.",
-            images: ["BUILDING.png"],
-            date: "October 2023",
+            images: [
+                "ARCH.png",
+                "ARCH2.png",
+                "ARCH3.png",
+                "ARCH4.png",
+                "ARCH5.png"
+            ],
+            date: "April 2026",
             category: "Architecture",
-            type: "Photographic Series",
+            type: "Building Scapes",
             featured: false
         },
         {
-            id: "PH-2023-002",
-            title: "Night Holes",
+            id: "PH-2026-002",
+            title: "Unconceptual Realities",
             description: "Photographic studies of emptiness and presence. This series explores how negative space defines form, using vast landscapes and intimate interiors.",
-            images: ["HOLE.png"],
-            date: "August 2023",
-            category: "Conceptual",
-            type: "Visual Study",
+            images: [
+                "UNC.png",
+                "UNC2.png",
+                "UNC3.png",
+                "UNC4.png",
+                "UNC5.png",
+                "UNC6.png"
+            ],
+            date: "April 2026",
+            category: "Unconceptual",
+            type: "Unconceptual Explorations",
             featured: false
         },
         {
-            id: "PH-2023-003",
+            id: "PH-2026-003",
             title: "Nature's Essence",
             description: "Minimalist portraits that focus on essential human expression. Stripped of color and context, these images reveal the universal language of emotion.",
-            images: ["NATURE.png"],
-            date: "June 2023",
+            images: [
+                "NATURE.png",
+                "NATURE2.png",
+                "NATURE3.png",
+                "NATURE4.png",
+                "NATURE5.png",
+                "NATURE6.png",
+                "NATURE7.png",
+                "NATURE8.png",
+                "NATURE9.png"
+            ],
+            date: "April 2026",
             category: "Nature",
-            type: "Portrait Series",
+            type: "Nature Wonders",
             featured: false
         },
         {
-            id: "PH-2023-004",
-            title: "The Grandeur",
-            description: "An exploration of pattern and repetition in the built environment. This series finds mathematical beauty in everyday urban scenes.",
-            images: ["GRANDE.png"],
-            date: "April 2023",
-            category: "Urban",
-            type: "Documentary Series",
+            id: "PH-2026-004",
+            title: "Human Void",
+            description: "An exploration of a necessary space for atoms to move, thereby enabling the existence of matter.",
+            images: [
+                "HUMAN.png",
+                "HUMAN2.png",
+                "HUMAN3.png",
+                "HUMAN4.png",
+                "HUMAN5.png",
+                "HUMAN6.png",
+                "HUMAN7.png",
+                "HUMAN8.png",
+                "HUMAN9.png",
+                "HUMAN10.png",
+                "HUMAN11.png"
+            ],
+            date: "April 2026",
+            category: "Human",
+            type: "The Void",
             featured: false
         }
     ],
@@ -492,6 +527,18 @@ class Portfolio {
         return el;
     }
 
+    getFallback(index) {
+        const fallbacks = [
+            'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&w=800&q=80',
+            'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80',
+        ];
+        return fallbacks[(index || 0) % fallbacks.length];
+    }
+
     createCard(item, category) {
         const el = document.createElement('div');
         el.className = 'gallery-item';
@@ -500,7 +547,8 @@ class Portfolio {
 
         const imgSrc = item.images[0];
         const isLocal = !imgSrc.startsWith('http');
-        const fallback = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80';
+        const fallback = this.getFallback(0);
+        const photoCount = item.images.length;
 
         el.innerHTML = `
             <div class="item-image-container">
@@ -518,6 +566,7 @@ class Portfolio {
                     <div class="item-title">${item.title}</div>
                     <div class="item-date">${item.date}</div>
                 </div>
+                ${photoCount > 1 ? `<div class="item-photo-count"><i class="fas fa-images"></i> ${photoCount}</div>` : ''}
                 <div class="item-view"><i class="fas fa-arrow-up-right-from-square"></i></div>
             </div>
         `;
@@ -573,7 +622,7 @@ class Portfolio {
             if (isLocal) {
                 modalImage.onerror = () => {
                     modalImage.onerror = null;
-                    modalImage.src = 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1600&q=80';
+                    modalImage.src = this.getFallback(0);
                 };
             }
             modalImage.alt = item.title;
@@ -584,9 +633,15 @@ class Portfolio {
                 const thumb = document.createElement('div');
                 thumb.className = `modal-gallery-item${i === 0 ? ' active' : ''}`;
                 const isL = !src.startsWith('http');
-                thumb.innerHTML = `<img src="${src}" alt="${item.title}" loading="lazy" ${isL ? `onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=200&q=60'"` : ''}>`;
+                const fbThumb = this.getFallback(i);
+                const fbMain  = this.getFallback(i);
+                thumb.innerHTML = `<img src="${src}" alt="${item.title} — Photo ${i + 1}" loading="lazy" ${isL ? `onerror="this.onerror=null;this.src='${fbThumb}'"` : ''}>`;
                 thumb.addEventListener('click', () => {
-                    document.getElementById('modalImage').src = src;
+                    const mainImg = document.getElementById('modalImage');
+                    mainImg.src = src;
+                    if (isL) {
+                        mainImg.onerror = () => { mainImg.onerror = null; mainImg.src = fbMain; };
+                    }
                     gallery.querySelectorAll('.modal-gallery-item').forEach(t => t.classList.remove('active'));
                     thumb.classList.add('active');
                 });
