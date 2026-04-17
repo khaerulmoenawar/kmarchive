@@ -150,7 +150,7 @@ const portfolioData = {
                 "NATURE5.png",
                 "NATURE6.png",
                 "NATURE7.png",
-                "NATURE8.png",
+                "NATURE8.png"
             ],
             date: "April 2026",
             category: "Nature",
