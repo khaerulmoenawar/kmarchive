@@ -104,7 +104,7 @@ const portfolioData = {
             featured: true
         }
     ],
-    photography: [
+    camerawork: [
         {
             id: "PH-2026-001",
             title: "Architectural Obscura",
@@ -185,7 +185,7 @@ class Portfolio {
         this.currentItem = null;
         this.allItems = [
             ...portfolioData.writing,
-            ...portfolioData.photography,
+            ...portfolioData.camerawork,
         ];
         this.audio = new Audio('SPK.mp3');
         this.audio.volume = 0.25;
@@ -479,7 +479,7 @@ class Portfolio {
             });
         }
 
-        ['photography'].forEach(cat => {
+        ['camerawork'].forEach(cat => {
             const grid = document.querySelector(`.${cat}-gallery`);
             if (!grid) return;
             portfolioData[cat].forEach(item => {
@@ -690,7 +690,7 @@ class Portfolio {
 
         let cat = '';
         if (portfolioData.writing.includes(this.currentItem))          cat = 'writing';
-        else if (portfolioData.photography.includes(this.currentItem)) cat = 'photography';
+        else if (portfolioData.camerawork.includes(this.currentItem)) cat = 'camerawork';
         if (!cat) return;
 
         const items = portfolioData[cat];
@@ -767,14 +767,14 @@ class Portfolio {
             return 0;
         });
 
-        document.querySelectorAll('.writing-gallery, .photography-gallery').forEach(g => {
+        document.querySelectorAll('.writing-gallery, .camerawork-gallery').forEach(g => {
             if (g) g.innerHTML = '';
         });
 
         sorted.forEach((item) => {
             let cat = '';
             if (portfolioData.writing.includes(item))          cat = 'writing';
-            else if (portfolioData.photography.includes(item)) cat = 'photography';
+            else if (portfolioData.camerawork.includes(item)) cat = 'camerawork';
             if (!cat) return;
 
             const grid = document.querySelector(`.${cat}-gallery`);
@@ -826,7 +826,7 @@ class Portfolio {
                     });
                 } else if (target) {
                     const cat = href.slice(1);
-                    this.filterGalleries(cat === 'writing' || cat === 'photography' ? cat : 'all');
+                    this.filterGalleries(cat === 'writing' || cat === 'camerawork' ? cat : 'all');
                     document.querySelectorAll('.category-btn').forEach(b => {
                         b.classList.toggle('active', b.dataset.category === (cat === 'about' ? 'all' : cat));
                     });
