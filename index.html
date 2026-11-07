@@ -1,229 +1,225 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="color-scheme" content="dark light">
-    <meta name="description" content="Khaerul's Archive — a personal collection of writing, photography, memories, and observations on life and love.">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Khaerul's Archive — A Living Collection">
-    <meta property="og:description" content="Through the lens and pen of Khaerul, fragments of existence find a place to remain.">
-    <meta name="theme-color" content="#090a09">
-    <title>Khaerul's Archive — A Living Collection</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#080808">
+    <title>KM's Archive</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <a class="skip-link" href="#mainContent">Skip to content</a>
-
     <div class="cursor" id="cursor" aria-hidden="true">
-        <span class="cursor-dot"></span>
-        <span class="cursor-ring"></span>
-        <span class="cursor-label" id="cursorLabel"></span>
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+        <div class="cursor-label" id="cursorLabel"></div>
     </div>
 
-    <div class="loader" id="loader" role="status" aria-label="Loading archive">
+    <div class="loader" id="loader" role="status" aria-label="Loading">
         <div class="loader-inner">
-            <div class="loader-logo">KM ARCHIVE</div>
-            <div class="loader-line"><div class="loader-line-inner" id="loaderProgress"></div></div>
-            <div class="loader-text" id="loaderText">PREPARING THE COLLECTION</div>
+            <div class="loader-logo">KM ARCHIVE'S</div>
+            <div class="loader-line">
+                <div class="loader-line-inner" id="loaderProgress"></div>
+            </div>
+            <div class="loader-text" id="loaderText">INITIALIZING ARCHIVE</div>
             <div class="loader-count" id="loaderCount">000</div>
         </div>
-        <div class="loader-corners" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <div class="loader-corners" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+        </div>
     </div>
 
     <div class="noise-overlay" aria-hidden="true"></div>
+
     <div class="ambient-orbs" aria-hidden="true">
-        <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
+
+    <div class="audio-player" id="audioPlayer" role="region" aria-label="Audio player">
+        <div class="audio-visualizer" id="audioViz" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <button class="audio-btn" id="playBtn" aria-label="Play music"><i class="fas fa-play"></i></button>
+        <button class="audio-btn" id="pauseBtn" style="display:none;" aria-label="Pause music"><i class="fas fa-pause"></i></button>
+        <span class="audio-track">Soldier, Poet, King</span>
+        <button class="audio-btn" id="volumeBtn" aria-label="Toggle volume"><i class="fas fa-volume-up"></i></button>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
+        <i class="fas fa-moon theme-icon"></i>
+    </button>
+
+    <a href="#home" class="back-to-top" id="backToTop" aria-label="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
 
     <header class="header" id="header">
         <div class="header-progress" id="headerProgress" aria-hidden="true"></div>
-        <a href="#home" class="logo" aria-label="Khaerul's Archive — home">
-            <span class="logo-km">KM</span><span class="logo-sep">/</span><span class="logo-archive">ARCHIVE</span>
+        <a href="#home" class="logo" aria-label="KM Archive home">
+            <span class="logo-km">KM</span>
+            <span class="logo-sep" aria-hidden="true">/</span>
+            <span class="logo-archive">ARCHIVE</span>
         </a>
-        <nav class="nav" id="mainNav" aria-label="Main navigation">
+        <nav class="nav" id="mainNav" role="navigation" aria-label="Main navigation">
             <div class="nav-links">
-                <a href="#home" class="nav-link active" data-index="01">Home</a>
-                <a href="#eloquentia" class="nav-link" data-index="02">Eloquentia</a>
-                <a href="#lucentia" class="nav-link" data-index="03">Lucentia</a>
-                <a href="#about" class="nav-link" data-index="04">About</a>
+                <a href="#home"        class="nav-link active" data-index="01">Home</a>
+                <a href="#eloquentia"     class="nav-link"        data-index="02">Eloquentia</a>
+                <a href="#lucentia" class="nav-link"        data-index="03">Lucentia</a>
+                <a href="#about"       class="nav-link"        data-index="04">About</a>
             </div>
         </nav>
-        <div class="header-tools">
-            <div class="header-time" id="headerTime" aria-label="Local time"></div>
-            <button class="nav-toggle" id="navToggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="mainNav">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
+        <div class="header-time" id="headerTime" aria-live="off"></div>
     </header>
 
-    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" title="Switch theme">
-        <i class="fas fa-moon theme-icon" aria-hidden="true"></i>
-    </button>
-
-    <a href="#home" class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
-        <i class="fas fa-arrow-up" aria-hidden="true"></i>
-    </a>
-
-    <main id="mainContent">
-        <section class="hero" id="home" aria-label="Introduction">
-            <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
-            <div class="hero-grain" aria-hidden="true"></div>
-            <div class="hero-content">
-                <div class="hero-eyebrow">
-                    <span class="eyebrow-line"></span>
-                    <span class="eyebrow-text">A PERSONAL COLLECTION · EST. 2026</span>
-                </div>
-                <h1 class="hero-title">
-                    <span class="hero-word" data-word="KHAERUL'S">Khaerul's</span>
-                    <em class="hero-word hero-word-italic" data-word="ARCHIVE">Archive</em>
-                </h1>
-                <p class="hero-subtitle">Through the lens and pen of Khaerul, the chaos of existence finds its clarity. A deliberate exercise in the art of leaving out—preserving only what is essential for the heart to remember.</p>
-                <div class="hero-cta">
-                    <a href="#eloquentia" class="cta-btn"><span>Explore the collection</span><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
-                    <span class="hero-count"><em id="heroTotalCount">15</em><span>pieces preserved</span></span>
-                </div>
+    <section class="hero" id="home" aria-label="Hero">
+        <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+        <div class="hero-content">
+            <div class="hero-eyebrow" aria-hidden="true">
+                <span class="eyebrow-line"></span>
+                <span class="eyebrow-text">KHAERUL'S ARCHIVE — EST. 2026</span>
             </div>
-            <div class="hero-scroll-indicator" aria-hidden="true">
-                <div class="scroll-track"><div class="scroll-thumb"></div></div><span>SCROLL TO DISCOVER</span>
+            <h1 class="hero-title">
+                <span class="hero-word" data-word="KHAERUL'S">Khaerul's</span>
+                <em class="hero-word hero-word-italic" data-word="ARCHIVE">Archive</em>
+            </h1>
+            <p class="hero-subtitle">Through the lens and pen of Khaerul, the chaos of existence finds its clarity. This collection is a deliberate exercise in the art of leaving out—preserving only what is essential for the heart to remember.</p>
+            <div class="hero-cta">
+                <a href="#eloquentia" class="cta-btn"><span>Explore Piece</span></a>
+                <span class="hero-count"><em>15</em> Pieces Archived</span>
             </div>
-            <div class="hero-index" aria-hidden="true">
-                <div class="hero-index-item">Eloquentia <span id="heroWritingCount">11</span></div>
-                <div class="hero-index-item">Lucentia <span id="heroVisualCount">04</span></div>
-            </div>
-            <div class="hero-side-note" aria-hidden="true">WORDS · IMAGES · MEANING</div>
-        </section>
-
-        <section class="archive-browser" id="archiveBrowser" aria-label="Browse the archive">
-            <div class="container">
-                <div class="browser-topline">
-                    <span class="browser-label">THE COLLECTION</span>
-                    <span class="browser-hint"><kbd>/</kbd> to search <span class="hint-separator">·</span> <kbd>Esc</kbd> to clear</span>
-                </div>
-                <div class="category-row">
-                    <div class="category-buttons" role="group" aria-label="Filter collection">
-                        <button class="category-btn active" type="button" data-category="all" aria-pressed="true"><span class="btn-text">All pieces</span><span class="btn-count" data-count="all">15</span></button>
-                        <button class="category-btn" type="button" data-category="eloquentia" aria-pressed="false"><span class="btn-text">Eloquentia</span><span class="btn-count" data-count="eloquentia">11</span></button>
-                        <button class="category-btn" type="button" data-category="lucentia" aria-pressed="false"><span class="btn-text">Lucentia</span><span class="btn-count" data-count="lucentia">04</span></button>
-                        <button class="category-btn saved-filter" type="button" data-category="saved" aria-pressed="false"><i class="fa-regular fa-bookmark" aria-hidden="true"></i><span class="btn-text">Saved</span><span class="btn-count" data-count="saved">00</span></button>
-                    </div>
-                    <label class="search-control" for="archiveSearch">
-                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                        <input id="archiveSearch" type="search" placeholder="Search the archive..." autocomplete="off" spellcheck="false">
-                        <button class="search-clear" id="searchClear" type="button" aria-label="Clear search" hidden><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-                        <kbd class="search-shortcut" aria-hidden="true">/</kbd>
-                    </label>
-                    <label class="category-sort" for="sortSelect"><span class="sort-label">SORT BY</span>
-                        <select class="filter-select" id="sortSelect">
-                            <option value="date-desc">Newest</option>
-                            <option value="date-asc">Oldest</option>
-                            <option value="title-asc">Title A–Z</option>
-                            <option value="featured">Featured</option>
-                        </select>
-                    </label>
-                </div>
-                <div class="filter-feedback" aria-live="polite" aria-atomic="true">
-                    <span id="filterStatus">Showing all 15 pieces</span>
-                    <span class="filter-status-line" aria-hidden="true"></span>
-                    <span class="filter-status-note">A catalogue of things worth keeping.</span>
-                </div>
-                <div class="global-empty" id="globalEmpty" hidden>
-                    <span class="empty-symbol">∅</span>
-                    <span class="empty-title">No pieces found.</span>
-                    <span class="empty-copy">Try a different search, or save a few pieces to build your own collection.</span>
-                </div>
-            </div>
-        </section>
-
-        <section class="gallery-section" id="eloquentia" aria-label="Eloquentia written archive">
-            <div class="section-number" aria-hidden="true">02</div>
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-kicker">01 / WRITTEN PIECES</div>
-                    <h2 class="section-title"><span class="section-title-line">Eloquentia</span><span class="section-title-line section-title-outline">In words.</span></h2>
-                    <p class="section-subtitle">Linguistic explorations on life and love—distilling the vastness of human experience into its most meaningful forms.</p>
-                </div>
-                <div class="gallery-grid eloquentia-gallery" role="list" aria-label="Written pieces"></div>
-            </div>
-        </section>
-
-        <section class="gallery-section lucentia-section" id="lucentia" aria-label="Lucentia visual archive">
-            <div class="section-number" aria-hidden="true">03</div>
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-kicker">02 / VISUAL STUDIES · IN PROGRESS</div>
-                    <h2 class="section-title"><span class="section-title-line">Lucentia</span><span class="section-title-line section-title-outline">In light.</span></h2>
-                    <p class="section-subtitle">Visual observations of light and shadow—capturing the quiet fragments of existence that the heart chooses to remember.</p>
-                </div>
-                <div class="gallery-grid lucentia-gallery" role="list" aria-label="Visual studies"></div>
-            </div>
-        </section>
-
-        <section class="gallery-section about-section" id="about" aria-label="About the archive">
-            <div class="section-number" aria-hidden="true">04</div>
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-kicker">THE PERSON BEHIND THE PIECES</div>
-                    <h2 class="section-title"><span class="section-title-line">About</span><span class="section-title-line section-title-outline">The archive.</span></h2>
-                </div>
-                <div class="about-grid">
-                    <div class="about-col">
-                        <h3 class="about-heading">Philosophy</h3>
-                        <p class="about-text">Creative expression begins with restraint. By filtering out distraction, I search for what is fundamental—those quiet elements that give meaning to love and existence. This archive reflects a pursuit of clarity, where simplicity reveals depth rather than diminishes it.</p>
-                        <p class="about-text">Each piece is an attempt to hold onto what would otherwise pass unnoticed, preserving meaning in its most honest form.</p>
-                    </div>
-                    <div class="about-col">
-                        <h3 class="about-heading">Methodology</h3>
-                        <p class="about-text">The process is one of intentional refinement. Whether through image or language, it starts with complexity and moves toward precision—distilling experience into its most truthful form. What emerges is not merely a creation, but a preserved impression shaped by focus and awareness.</p>
-                        <p class="about-text">This archive becomes a collection of those encounters, where emotion and memory are translated into words and visuals without losing their original sense of presence.</p>
-                    </div>
-                </div>
-                <div class="about-quote">
-                    <div class="quote-mark" aria-hidden="true">“</div>
-                    <blockquote>The mind forgets, but the heart will always remember. And what is the heart's memory but love itself?</blockquote>
-                    <cite>Twan Eng Tan</cite>
-                </div>
-                <div class="about-stats">
-                    <div class="stat-item"><span class="stat-num" data-stat="pieces">15</span><span class="stat-label">Pieces archived</span></div>
-                    <div class="stat-item"><span class="stat-num">02</span><span class="stat-label">Creative disciplines</span></div>
-                    <div class="stat-item"><span class="stat-num">2026</span><span class="stat-label">Year founded</span></div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <div class="container footer-inner">
-            <a href="#home" class="footer-mark" aria-label="Back to top">KM<span> / ARCHIVE</span></a>
-            <p class="footer-note">A place for the things time should not take away.</p>
-            <span class="footer-copyright">© <span id="footerYear">2026</span> KHAERUL</span>
         </div>
-    </footer>
+        <div class="hero-scroll-indicator" aria-hidden="true">
+            <div class="scroll-track">
+                <div class="scroll-thumb"></div>
+            </div>
+            <span>SCROLL</span>
+        </div>
+        <div class="hero-index" aria-hidden="true">
+            <div class="hero-index-item">Eloquentia <span>11</span></div>
+            <div class="hero-index-item">Lucentia <span>04</span></div>
+        </div>
+    </section>
 
-    <div class="audio-player" id="audioPlayer" role="group" aria-label="Ambient audio controls">
-        <div class="audio-visualizer" id="audioViz" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-        <button class="audio-btn" id="playBtn" type="button" aria-label="Play ambient audio" title="Play"><i class="fas fa-play" aria-hidden="true"></i></button>
-        <button class="audio-btn" id="pauseBtn" type="button" aria-label="Pause ambient audio" title="Pause" hidden><i class="fas fa-pause" aria-hidden="true"></i></button>
-        <span class="audio-track">Soldier, Poet, King</span>
-        <button class="audio-btn" id="volumeBtn" type="button" aria-label="Mute audio" title="Mute"><i class="fas fa-volume-high" aria-hidden="true"></i></button>
+    <div class="category-nav" id="categoryNav" role="navigation" aria-label="Content filter">
+        <div class="container">
+            <div class="category-row">
+                <div class="category-label" aria-hidden="true">FILTER</div>
+                <div class="category-buttons" role="group" aria-label="Filter by category">
+                    <button class="category-btn active" data-category="all">
+                        <span class="btn-text">All Piece</span>
+                        <span class="btn-count" aria-label="15 items">15</span>
+                    </button>
+                    <button class="category-btn" data-category="eloquentia">
+                        <span class="btn-text">Eloquentia</span>
+                        <span class="btn-count" aria-label="11 items">11</span>
+                    </button>
+                    <button class="category-btn" data-category="lucentia">
+                        <span class="btn-text">Lucentia</span>
+                        <span class="btn-count" aria-label="4 items">04</span>
+                    </button>
+                </div>
+                <div class="category-sort">
+                    <span class="sort-label" id="sort-label">SORT</span>
+                    <select class="filter-select" id="sortSelect" aria-labelledby="sort-label">
+                        <option value="date">Date</option>
+                        <option value="title">Title</option>
+                        <option value="featured">Featured</option>
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+    <section class="gallery-section" id="eloquentia" aria-label="Eloquentia archive">
+        <div class="section-number" aria-hidden="true">02</div>
+        <div class="container">
+            <div class="section-header">
+                <div class="section-kicker">WRITTEN PIECE</div>
+                <h2 class="section-title">
+                    <span class="section-title-line">Eloquentia</span>
+                    <span class="section-title-line section-title-outline">Archive</span>
+                </h2>
+                <p class="section-subtitle">Linguistic explorations on life and love—distilling the vastness of human experience into its most meaningful forms.</p>
+            </div>
+            <div class="gallery-grid eloquentia-gallery" role="list"></div>
+        </div>
+    </section>
+
+    <section class="gallery-section" id="lucentia" aria-label="Lucentia archive">
+        <div class="section-number" aria-hidden="true">03</div>
+        <div class="container">
+            <div class="section-header">
+                <div class="section-kicker">VISUAL PIECE (works in progress)</div>
+                <h2 class="section-title">
+                    <span class="section-title-line">Lucentia</span>
+                    <span class="section-title-line section-title-outline">Archive</span>
+                </h2>
+                <p class="section-subtitle">Visual observations of light and shadow—capturing the random fragments of existence that the heart chooses to remember.</p>
+            </div>
+            <div class="gallery-grid lucentia-gallery" role="list"></div>
+        </div>
+    </section>
+
+    <section class="gallery-section about-section" id="about" aria-label="About the archive">
+        <div class="section-number" aria-hidden="true">04</div>
+        <div class="container">
+            <div class="section-header">
+                <div class="section-kicker">THE MAKER</div>
+                <h2 class="section-title">
+                    <span class="section-title-line">About</span>
+                    <span class="section-title-line section-title-outline">The Archive</span>
+                </h2>
+            </div>
+            <div class="about-grid">
+                <div class="about-col">
+                    <h3 class="about-heading">Philosophy</h3>
+                    <p class="about-text">Creative expression begins with restraint. By filtering out distraction, I search for what is fundamental—those quiet elements that give meaning to love and existence. This archive reflects a pursuit of clarity, where simplicity reveals depth rather than diminishes it.</p>
+                    <p class="about-text">Each piece is an attempt to hold onto what would otherwise pass unnoticed, preserving meaning in its most honest form.</p>
+                </div>
+                <div class="about-col">
+                    <h3 class="about-heading">Methodology</h3>
+                    <p class="about-text">The process is one of intentional refinement. Whether through image or language, it starts with complexity and moves toward precision—distilling experience into its most truthful form. What emerges is not merely a creation, but a preserved impression shaped by focus and awareness.</p>
+                    <p class="about-text">This archive becomes a collection of those encounters, where emotion and memory are translated into words and visuals without losing their original sense of presence.</p>
+                </div>
+            </div>
+            <div class="about-quote">
+                <div class="quote-mark" aria-hidden="true">"</div>
+                <blockquote>The mind forgets, but the heart will always remember. And what is the heart's memory but love itself?</blockquote>
+                <cite>Twan Eng Tan</cite>
+            </div>
+            <div class="about-stats">
+                <div class="stat-item">
+                    <span class="stat-num">15</span>
+                    <span class="stat-label">Piece Archived</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">2</span>
+                    <span class="stat-label">Disciplines</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">2026</span>
+                    <span class="stat-label">Year Founded</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-backdrop" id="modalBackdrop"></div>
-        <div class="modal-content" id="modalContent" tabindex="-1">
-            <div class="modal-reading-progress" aria-hidden="true"><span id="modalReadingProgress"></span></div>
-            <button class="modal-close" id="modalClose" type="button" aria-label="Close details"><span></span><span></span></button>
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose" aria-label="Close">
+                <span></span><span></span>
+            </button>
             <div class="modal-body">
                 <div class="modal-media">
-                    <div class="modal-image-wrap" id="modalImageWrap">
-                        <img src="" alt="" class="modal-image" id="modalImage" draggable="false">
+                    <div class="modal-image-wrap">
+                        <img src="" alt="" class="modal-image" id="modalImage">
                         <div class="modal-image-overlay" aria-hidden="true"></div>
-                        <button class="image-expand" id="imageExpand" type="button" aria-label="Open image viewer"><i class="fa-solid fa-expand" aria-hidden="true"></i><span>EXPAND</span></button>
                     </div>
                     <div class="modal-gallery" id="modalGallery" role="list" aria-label="Image gallery"></div>
                 </div>
@@ -233,21 +229,30 @@
                     <div class="modal-description" id="modalDescription"></div>
                     <div class="modal-divider" aria-hidden="true"></div>
                     <div class="modal-meta-grid">
-                        <div class="meta-item"><span class="meta-label">Date added</span><span class="meta-value" id="modalDate"></span></div>
-                        <div class="meta-item"><span class="meta-label">Category</span><span class="meta-value" id="modalCategory2"></span></div>
-                        <div class="meta-item"><span class="meta-label">Type</span><span class="meta-value" id="modalType"></span></div>
-                        <div class="meta-item"><span class="meta-label">Status</span><span class="meta-value meta-preserved">Preserved</span></div>
-                        <div class="meta-item meta-full"><span class="meta-label">Accession no.</span><span class="meta-value meta-mono" id="modalId"></span></div>
-                    </div>
-                    <div class="modal-actions">
-                        <button class="modal-action-btn" id="modalFavorite" type="button"><i class="fa-regular fa-bookmark" aria-hidden="true"></i><span>Save piece</span></button>
-                        <button class="modal-action-btn" id="modalShare" type="button"><i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i><span>Share</span></button>
-                        <button class="modal-action-btn" id="modalCopy" type="button"><i class="fa-regular fa-copy" aria-hidden="true"></i><span>Copy link</span></button>
+                        <div class="meta-item">
+                            <span class="meta-label">Date Added</span>
+                            <span class="meta-value" id="modalDate"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Category</span>
+                            <span class="meta-value" id="modalCategory2"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Type</span>
+                            <span class="meta-value" id="modalType"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Status</span>
+                            <span class="meta-value meta-preserved">Preserved</span>
+                        </div>
+                        <div class="meta-item meta-full">
+                            <span class="meta-label">Accession No.</span>
+                            <span class="meta-value meta-mono" id="modalId"></span>
+                        </div>
                     </div>
                     <div class="modal-nav-row">
-                        <button class="modal-nav-btn" id="modalPrev" type="button" aria-label="Previous piece"><i class="fas fa-arrow-left" aria-hidden="true"></i> Prev</button>
-                        <span class="modal-position" id="modalPosition"></span>
-                        <button class="modal-nav-btn" id="modalNext" type="button" aria-label="Next piece">Next <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+                        <button class="modal-nav-btn" id="modalPrev" aria-label="Previous item"><i class="fas fa-arrow-left"></i> Prev</button>
+                        <button class="modal-nav-btn" id="modalNext" aria-label="Next item">Next <i class="fas fa-arrow-right"></i></button>
                     </div>
                     <p class="modal-swipe-hint">← swipe to navigate →</p>
                 </div>
@@ -255,18 +260,6 @@
         </div>
     </div>
 
-    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer" aria-hidden="true">
-        <button class="lightbox-backdrop" id="lbBackdrop" type="button" aria-label="Close image viewer"></button>
-        <div class="lightbox-shell">
-            <div class="lightbox-topbar"><div class="lightbox-heading"><span class="lightbox-overline">VISUAL ARCHIVE</span><span id="lbTitle">Image</span></div><div class="lightbox-counter" id="lbCounter">01 / 01</div><button class="lightbox-close" id="lbClose" type="button" aria-label="Close image viewer"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div>
-            <div class="lightbox-stage" id="lbImgWrap"><button class="lightbox-nav lightbox-prev" id="lbPrev" type="button" aria-label="Previous image"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></button><img id="lbImg" class="lightbox-image" src="" alt="" draggable="false"><button class="lightbox-nav lightbox-next" id="lbNext" type="button" aria-label="Next image"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button></div>
-            <div class="lightbox-bottombar"><span class="lightbox-tip">Scroll or use controls to zoom · Drag to explore</span><div class="lightbox-zoom-controls"><button id="lbZoomOut" type="button" aria-label="Zoom out">−</button><span id="lbZoomHint">100%</span><button id="lbZoomIn" type="button" aria-label="Zoom in">+</button><button id="lbZoomReset" type="button" aria-label="Reset zoom"><i class="fa-solid fa-compress" aria-hidden="true"></i></button></div></div>
-        </div>
-    </div>
-
-    <div class="toast" id="siteToast" role="status" aria-live="polite"></div>
-    <noscript><div class="noscript-note">This archive needs JavaScript enabled to display the complete collection.</div></noscript>
-
-    <script src="script.js" defer></script>
+    <script src="script.js"></script>
 </body>
 </html>
