@@ -990,3 +990,7 @@ body.light-mode .modal-nav-btn:hover { color: var(--white); background: var(--bg
     .cta-btn { padding: 14px 24px; font-size: 10px; }
     .category-btn { padding: 8px 10px; letter-spacing: 2px; }
 }
+
+body.light-mode .cursor-ring {
+    border-color: rgba(10, 10, 8, 0.42);
+}
