@@ -191,11 +191,7 @@ class Portfolio {
         this.audio.volume = 0.25;
         this.audio.loop = true;
         this.isAudioPlaying = false;
-        let saved = null; try { saved = localStorage.getItem('km-theme'); } catch (e) {}
-        this.isDark = saved ? saved === 'dark' : !matchMedia('(prefers-color-scheme: light)').matches;
-        this.finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
-        this._pushed = false;
-        this._lastFocus = null;
+        this.isDark = true;
         this.mouseX = window.innerWidth / 2;
         this.mouseY = window.innerHeight / 2;
         this.cursorX = this.mouseX;
@@ -210,7 +206,6 @@ class Portfolio {
     }
 
     init() {
-        this.applyTheme();
         this.setVhVariable();
         this.setupLoader();
         this.setupCursor();
@@ -224,8 +219,7 @@ class Portfolio {
         this.setupScrollHandlers();
         this.setupMobileNav();
         this.setupTouchGestures();
-        this.setupFx();
-        if (this.finePointer) this.tickCursor();
+        if (!this.isMobile) this.tickCursor();
 
         let resizeTimer;
         window.addEventListener('resize', () => {
@@ -259,7 +253,7 @@ class Portfolio {
                 clearInterval(interval);
                 setTimeout(() => {
                     loader.classList.add('hidden');
-                    setTimeout(() => this.startHeroAnimations(), 380);
+                    this.startHeroAnimations();
                 }, 600);
             }
 
@@ -277,56 +271,62 @@ class Portfolio {
     }
 
     setupCursor() {
-        if (!this.finePointer) return;
-        const cursor = document.getElementById('cursor');
-        const label  = document.getElementById('cursorLabel');
-        document.addEventListener('mousemove', e => { this.mouseX = e.clientX; this.mouseY = e.clientY; }, { passive: true });
-        document.addEventListener('mousedown', () => cursor?.classList.add('clicking'));
-        document.addEventListener('mouseup', () => cursor?.classList.remove('clicking'));
-        const sel = 'a, button, select, .category-btn, .filter-select, .theme-toggle, .back-to-top, .audio-player, .gallery-item';
-        let current = null;
-        const reset = () => { current = null; cursor?.classList.remove('hovering', 'gallery-hover'); if (label) label.textContent = ''; };
-        document.addEventListener('mouseover', e => {
-            const el = e.target.closest ? e.target.closest(sel) : null;
-            if (el === current) return;
-            current = el;
-            if (!el) return reset();
-            const text = el.classList.contains('eloquentia-entry') ? 'READ' : el.classList.contains('gallery-item') ? 'VIEW' : '';
-            cursor?.classList.add('hovering');
-            cursor?.classList.toggle('gallery-hover', !!text);
-            if (label) label.textContent = text;
-        });
-        document.documentElement.addEventListener('mouseleave', reset);
-    }
+        if (this.isMobile) return;
 
+        document.addEventListener('mousemove', e => {
+            this.mouseX = e.clientX;
+            this.mouseY = e.clientY;
+        });
+
+        document.addEventListener('mousedown', () => {
+            document.getElementById('cursor')?.classList.add('clicking');
+        });
+        document.addEventListener('mouseup', () => {
+            document.getElementById('cursor')?.classList.remove('clicking');
+        });
+
+        const addHover = (selector, label = '') => {
+            document.querySelectorAll(selector).forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const cursor = document.getElementById('cursor');
+                    cursor?.classList.add('hovering');
+                    if (label) {
+                        cursor?.classList.add('gallery-hover');
+                        const lbl = document.getElementById('cursorLabel');
+                        if (lbl) lbl.textContent = label;
+                    }
+                });
+                el.addEventListener('mouseleave', () => {
+                    const cursor = document.getElementById('cursor');
+                    cursor?.classList.remove('hovering', 'gallery-hover');
+                    const lbl = document.getElementById('cursorLabel');
+                    if (lbl) lbl.textContent = '';
+                });
+            });
+        };
+
+        addHover('a, button, .category-btn, .filter-select, .theme-toggle, .back-to-top, .audio-player');
+        addHover('.gallery-item:not(.eloquentia-entry)', 'VIEW');
+        addHover('.eloquentia-entry', 'READ');
+    }
 
     tickCursor() {
-        const c = document.getElementById('cursor');
-        if (!c || this._cursorOn) return;
-        this._cursorOn = true;
-        const ring = c.querySelector('.cursor-ring');
-        const label = c.querySelector('.cursor-label');
-        let rx = this.mouseX, ry = this.mouseY, last = performance.now();
-        const loop = now => {
-            const k = 1 - Math.exp(-Math.min(now - last, 50) / 80);
-            last = now;
-            rx += (this.mouseX - rx) * k;
-            ry += (this.mouseY - ry) * k;
-            const ox = rx - this.mouseX, oy = ry - this.mouseY;
-            c.style.transform = `translate3d(${this.mouseX}px, ${this.mouseY}px, 0)`;
-            if (ring) ring.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
-            if (label) label.style.transform = `translate(calc(22px + ${ox}px), calc(-50% + ${oy}px))`;
-            requestAnimationFrame(loop);
-        };
-        requestAnimationFrame(loop);
-    }
+        const cursor = document.getElementById('cursor');
+        if (!cursor) return;
 
+        const lerp = (a, b, t) => a + (b - a) * t;
+        this.cursorX = lerp(this.cursorX, this.mouseX, 0.1);
+        this.cursorY = lerp(this.cursorY, this.mouseY, 0.1);
+
+        cursor.style.transform = `translate(calc(${this.cursorX}px - 50%), calc(${this.cursorY}px - 50%))`;
+        requestAnimationFrame(() => this.tickCursor());
+    }
 
     setupCanvas() {
         const canvas = document.getElementById('heroCanvas');
         if (!canvas) return;
 
-        if (this.isMobile || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (this.isMobile) {
             canvas.style.display = 'none';
             return;
         }
@@ -387,7 +387,6 @@ class Portfolio {
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    cancelAnimationFrame(animFrame);
                     animFrame = requestAnimationFrame(draw);
                 } else {
                     cancelAnimationFrame(animFrame);
@@ -437,7 +436,6 @@ class Portfolio {
             this.isNavOpen = !this.isNavOpen;
             toggle.classList.toggle('open', this.isNavOpen);
             nav?.classList.toggle('open', this.isNavOpen);
-            header.classList.toggle('menu-open', this.isNavOpen);
             document.body.classList.toggle('modal-open', this.isNavOpen);
         });
 
@@ -447,7 +445,6 @@ class Portfolio {
                     this.isNavOpen = false;
                     toggle.classList.remove('open');
                     nav?.classList.remove('open');
-                    header.classList.remove('menu-open');
                     document.body.classList.remove('modal-open');
                 }
             });
@@ -523,66 +520,8 @@ class Portfolio {
             </div>
         `;
 
-        this.makeActivatable(el, item);
-        return el;
-    }
-
-    _docH() { return this._dh || (this._dh = document.documentElement.scrollHeight); }
-
-    scrollToY(y) {
-        if (window._kmSmoothTo) window._kmSmoothTo(y);
-        else window.scrollTo({ top: typeof y === 'function' ? y() : y, behavior: 'smooth' });
-    }
-
-    setupFx() {
-        new ResizeObserver(() => { this._dh = 0; }).observe(document.body);
-        const modalImg = document.getElementById('modalImage');
-        if (modalImg) new MutationObserver(() => {
-            modalImg.classList.remove('swap'); void modalImg.offsetWidth; modalImg.classList.add('swap');
-        }).observe(modalImg, { attributes: true, attributeFilter: ['src'] });
-
-        if (!this.finePointer || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        const hero = document.querySelector('.hero');
-        const cta  = document.querySelector('.cta-btn');
-        let raf = 0, ev = null, tilted = null;
-        document.addEventListener('pointermove', e => {
-            ev = e;
-            if (raf) return;
-            raf = requestAnimationFrame(() => {
-                raf = 0;
-                if (hero) {
-                    const r = hero.getBoundingClientRect();
-                    if (r.bottom > 0) {
-                        hero.style.setProperty('--mx', `${ev.clientX - r.left}px`);
-                        hero.style.setProperty('--my', `${ev.clientY - r.top}px`);
-                    }
-                }
-                const card = ev.target.closest ? ev.target.closest('.gallery-item:not(.eloquentia-entry) .item-image-container') : null;
-                if (card !== tilted) { if (tilted) tilted.style.transform = ''; tilted = card; }
-                if (card) {
-                    const r = card.getBoundingClientRect();
-                    const x = (ev.clientX - r.left) / r.width - 0.5;
-                    const y = (ev.clientY - r.top) / r.height - 0.5;
-                    card.style.transform = `perspective(900px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg)`;
-                }
-                if (cta) {
-                    const r = cta.getBoundingClientRect();
-                    const dx = ev.clientX - (r.left + r.width / 2);
-                    const dy = ev.clientY - (r.top + r.height / 2);
-                    cta.style.transform = Math.hypot(dx, dy) < 120 ? `translate(${dx * 0.22}px, ${dy * 0.22}px)` : '';
-                }
-            });
-        }, { passive: true });
-    }
-
-    makeActivatable(el, item) {
-        el.tabIndex = 0;
-        el.setAttribute('role', 'button');
-        el.setAttribute('aria-label', `Open ${item.title}`);
         el.addEventListener('click', () => this.openModal(item));
-        el.addEventListener('keydown', e => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.openModal(item); }
-        });
+        return el;
     }
 
     getFallback(index) {
@@ -627,7 +566,7 @@ class Portfolio {
             </div>
         `;
 
-        this.makeActivatable(el, item);
+        el.addEventListener('click', () => this.openModal(item));
         return el;
     }
 
@@ -726,15 +665,9 @@ class Portfolio {
         document.getElementById('modalCategory').textContent = item.category || '';
         document.getElementById('modalCategory2').textContent = item.category || '';
         document.getElementById('modalDate').textContent = item.date;
-        const mins = Math.max(1, Math.round(item.description.replace(/<[^>]+>/g, ' ').split(/\s+/).length / 200));
-        document.getElementById('modalType').textContent = isWriting ? `${item.type}, ${mins} min read` : item.type;
+        document.getElementById('modalType').textContent = item.type;
         document.getElementById('modalId').textContent = item.id;
 
-        if (!modal.classList.contains('active')) {
-            this._lastFocus = document.activeElement;
-            history.pushState({ km: 'modal' }, '');
-            this._pushed = true;
-        }
         modal.classList.add('active');
         document.body.classList.add('modal-open');
         document.getElementById('header')?.classList.remove('nav-hidden');
@@ -747,16 +680,10 @@ class Portfolio {
     }
 
     closeModal() {
-        const modal = document.getElementById('detailModal');
-        if (!modal.classList.contains('active')) return;
-        modal.classList.remove('active');
+        document.getElementById('detailModal').classList.remove('active');
         document.body.classList.remove('modal-open');
-        document.querySelector('.modal-content')?.removeAttribute('style');
         this.currentItem = null;
-        if (this._pushed) { this._pushed = false; history.back(); }
-        this._lastFocus?.focus?.({ preventScroll: true });
     }
-
 
     navigateModal(dir) {
         if (!this.currentItem) return;
@@ -796,12 +723,11 @@ class Portfolio {
         const player    = document.getElementById('audioPlayer');
 
         playBtn?.addEventListener('click', () => {
-            this.audio.play().then(() => {
-                this.isAudioPlaying = true;
-                playBtn.style.display = 'none';
-                if (pauseBtn) pauseBtn.style.display = '';
-                player?.classList.add('audio-playing');
-            }).catch(() => {});
+            this.audio.play().catch(() => {});
+            this.isAudioPlaying = true;
+            playBtn.style.display = 'none';
+            if (pauseBtn) pauseBtn.style.display = '';
+            player?.classList.add('audio-playing');
         });
 
         pauseBtn?.addEventListener('click', () => {
@@ -893,7 +819,7 @@ class Portfolio {
                 link.classList.add('active');
 
                 if (href === '#home') {
-                    this.scrollToY(0);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                     this.filterGalleries('all');
                     document.querySelectorAll('.category-btn').forEach(b => {
                         b.classList.toggle('active', b.dataset.category === 'all');
@@ -904,7 +830,7 @@ class Portfolio {
                     document.querySelectorAll('.category-btn').forEach(b => {
                         b.classList.toggle('active', b.dataset.category === (cat === 'about' ? 'all' : cat));
                     });
-                    setTimeout(() => this.scrollToY(() => { let y = 0; for (let el = target; el; el = el.offsetParent) y += el.offsetTop; return y; }), 50);
+                    setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
                 }
             });
         });
@@ -922,22 +848,20 @@ class Portfolio {
             if (e.key === 'ArrowRight') this.navigateModal(1);
         });
 
-        window.addEventListener('popstate', () => {
-            if (document.getElementById('detailModal').classList.contains('active')) { this._pushed = false; this.closeModal(); }
-        });
-
         document.getElementById('themeToggle')?.addEventListener('click', () => this.toggleTheme());
 
         document.getElementById('backToTop')?.addEventListener('click', e => {
             e.preventDefault();
-            this.scrollToY(0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
     filterGalleries(category) {
         document.querySelectorAll('.gallery-section').forEach(section => {
-            clearTimeout(section._hideTimer);
-            if (category === 'all' || section.id === category) {
+
+            const show = category === 'all' || section.id === category;
+
+            if (show) {
                 section.style.display = '';
                 requestAnimationFrame(() => {
                     section.style.transition = 'opacity 0.5s var(--ease-smooth), transform 0.5s var(--ease-expo)';
@@ -948,45 +872,17 @@ class Portfolio {
                 section.style.transition = 'opacity 0.4s var(--ease-smooth), transform 0.4s var(--ease-expo)';
                 section.style.opacity = '0';
                 section.style.transform = 'translateY(30px)';
-                section._hideTimer = setTimeout(() => { section.style.display = 'none'; }, 450);
+                setTimeout(() => { section.style.display = 'none'; }, 450);
             }
         });
     }
 
-
-    applyTheme() {
+    toggleTheme() {
+        this.isDark = !this.isDark;
         document.body.classList.toggle('light-mode', !this.isDark);
         const icon = document.querySelector('.theme-icon');
-        if (icon) {
-            const next = document.createElement('i');
-            next.className = `fas fa-${this.isDark ? 'moon' : 'sun'} theme-icon`;
-            icon.replaceWith(next);
-        }
-        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', this.isDark ? '#080808' : '#f5f5f0');
+        if (icon) icon.className = `fas fa-${this.isDark ? 'moon' : 'sun'} theme-icon`;
     }
-
-    toggleTheme() {
-        const flip = () => {
-            this.isDark = !this.isDark;
-            try { localStorage.setItem('km-theme', this.isDark ? 'dark' : 'light'); } catch (e) {}
-            this.applyTheme();
-        };
-        const btn = document.getElementById('themeToggle');
-        if (!document.startViewTransition || !btn || matchMedia('(prefers-reduced-motion: reduce)').matches) return flip();
-        const r = btn.getBoundingClientRect();
-        const x = r.left + r.width / 2, y = r.top + r.height / 2;
-        const rad = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-        const root = document.documentElement;
-        root.classList.add('theme-vt');
-        const t = document.startViewTransition(flip);
-        t.ready.then(() => root.animate(
-            { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${rad}px at ${x}px ${y}px)`] },
-            { duration: 800, easing: 'cubic-bezier(0.19, 1, 0.22, 1)', pseudoElement: '::view-transition-new(root)' }
-        )).catch(() => {});
-        t.finished.finally(() => root.classList.remove('theme-vt'));
-    }
-
-
 
     setupScrollHandlers() {
         const header      = document.getElementById('header');
@@ -1002,11 +898,11 @@ class Portfolio {
             if (ticking) return;
             requestAnimationFrame(() => {
                 const y = window.scrollY;
-                const maxScroll = this._docH() - window.innerHeight;
+                const maxScroll = document.body.scrollHeight - window.innerHeight;
                 const pct = maxScroll > 0 ? (y / maxScroll) * 100 : 0;
 
                 header?.classList.toggle('scrolled', y > 60);
-                if (headerProg) headerProg.style.transform = `scaleX(${pct / 100})`;
+                if (headerProg) headerProg.style.width = `${pct}%`;
                 backToTop?.classList.toggle('visible', y > 600);
 
                 if (this.isMobile && header) {
@@ -1411,108 +1307,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expose lb globally so Portfolio can call lb.open() directly if needed
     window._km_lightbox = lb;
 });
-
-
-/* ============================================================
-   ICONS: inline SVG, swaps <i class="fas fa-*"> automatically
-   ============================================================ */
-(() => {
-    const F = 'fill="currentColor"';
-    const P = {
-        'play': `<polygon ${F} points="7 4 20 12 7 20"/>`,
-        'pause': `<rect ${F} x="6" y="4" width="4" height="16"/><rect ${F} x="14" y="4" width="4" height="16"/>`,
-        'volume-up': '<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>',
-        'volume-mute': '<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m22 9-6 6M16 9l6 6"/>',
-        'moon': '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>',
-        'sun': '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
-        'arrow-up': '<path d="M12 19V5M5 12l7-7 7 7"/>',
-        'arrow-left': '<path d="M19 12H5M12 19l-7-7 7-7"/>',
-        'arrow-right': '<path d="M5 12h14M12 5l7 7-7 7"/>',
-        'images': '<rect x="6" y="2" width="16" height="16" rx="2"/><path d="M2 6v14a2 2 0 0 0 2 2h14"/><circle cx="12" cy="8" r="1.5"/><path d="m22 13-3-3-7 7"/>',
-        'arrow-up-right-from-square': '<path d="M7 17 17 7M8 7h9v9"/>'
-    };
-    const swap = el => {
-        const names = [...el.classList];
-        const key = names.filter(c => c.startsWith('fa-')).map(c => c.slice(3)).find(c => P[c]);
-        if (!key) return;
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('viewBox', '0 0 24 24');
-        svg.setAttribute('aria-hidden', 'true');
-        svg.setAttribute('class', ['ico', ...names.filter(c => c !== 'fas' && !c.startsWith('fa-'))].join(' '));
-        svg.innerHTML = P[key];
-        el.replaceWith(svg);
-    };
-    const run = root => root.querySelectorAll && root.querySelectorAll('i.fas').forEach(swap);
-    run(document);
-    new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
-        if (n.nodeType !== 1) return;
-        if (n.matches('i.fas')) swap(n); else run(n);
-    }))).observe(document.body, { childList: true, subtree: true });
-})();
-
-
-/* ============================================================
-   INERTIA SCROLL (mouse wheel + keyboard; touch stays native)
-   ============================================================ */
-(() => {
-    if (!matchMedia('(hover: hover) and (pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const root = document.documentElement;
-    root.classList.add('km-lerp');
-    const max = () => Math.max(0, root.scrollHeight - innerHeight);
-    const clamp = v => Math.min(Math.max(v, 0), max());
-    let target = scrollY, current = scrollY, raf = 0, last = 0, tw = null;
-    const step = now => {
-        const dt = Math.min(now - last, 50);
-        last = now;
-        if (tw) {
-            const p = Math.min((now - tw.t0) / tw.d, 1);
-            current = tw.from + (clamp(tw.to()) - tw.from) * (p === 1 ? 1 : 1 - Math.pow(2, -10 * p));
-            target = current;
-            if (p === 1) tw = null;
-        } else {
-            current += (target - current) * (1 - Math.exp(-dt / 85));
-            if (Math.abs(target - current) < 0.3) current = target;
-        }
-        scrollTo(0, current);
-        raf = (tw || current !== target) ? requestAnimationFrame(step) : 0;
-    };
-    const kick = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(step); } };
-    const base = () => (raf ? target : scrollY);
-    const locked = () => document.body.classList.contains('modal-open');
-
-    addEventListener('wheel', e => {
-        if (e.ctrlKey || e.defaultPrevented || locked() || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-        if (e.target.closest && e.target.closest('select, textarea, .modal-gallery')) return;
-        e.preventDefault();
-        tw = null;
-        target = clamp(base() + e.deltaY * (e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? innerHeight : 1));
-        kick();
-    }, { passive: false });
-
-    addEventListener('keydown', e => {
-        if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || locked()) return;
-        const a = document.activeElement;
-        if (a && a !== document.body && a.matches('input, textarea, select, button, a, [role="button"], [contenteditable]')) return;
-        const page = innerHeight * 0.85;
-        const d = { ArrowDown: 90, ArrowUp: -90, PageDown: page, PageUp: -page, ' ': e.shiftKey ? -page : page }[e.key];
-        if (d === undefined && e.key !== 'Home' && e.key !== 'End') return;
-        e.preventDefault();
-        tw = null;
-        target = clamp(e.key === 'Home' ? 0 : e.key === 'End' ? max() : base() + d);
-        kick();
-    });
-
-    // anything else that moves the page (scrollbar drag, find-in-page) takes over
-    addEventListener('scroll', () => {
-        if (Math.abs(scrollY - current) < 2) return;
-        cancelAnimationFrame(raf); raf = 0; tw = null;
-        target = current = scrollY;
-    }, { passive: true });
-
-    // used by nav links and back-to-top: one eased glide that follows layout changes
-    window._kmSmoothTo = to => {
-        const from = raf ? current : scrollY;
-        tw = { from, to: typeof to === 'function' ? to : () => to, t0: performance.now(), d: 1100 };
-        kick();
-    };
-})();
