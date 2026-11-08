@@ -991,6 +991,97 @@ body.light-mode .modal-nav-btn:hover { color: var(--white); background: var(--bg
     .category-btn { padding: 8px 10px; letter-spacing: 2px; }
 }
 
-body.light-mode .cursor-ring {
-    border-color: rgba(10, 10, 8, 0.42);
+/* ============================================================
+   REFINEMENTS
+   ============================================================ */
+html { scroll-padding-top: 96px; }
+::selection { background: var(--accent); color: var(--bg); }
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+.hero-title, .section-title, .wr-entry-title, .modal-title, .about-quote blockquote { text-wrap: balance; }
+.wr-entry-excerpt, .about-text, .section-subtitle { text-wrap: pretty; }
+.gallery-item:focus-visible { outline-offset: -1px; }
+.gallery-item:focus-visible .item-overlay { opacity: 1; }
+.gallery-item:focus-visible .item-info { opacity: 1; transform: none; }
+.eloquentia-entry:focus-visible::before { transform: scaleY(1); }
+
+/* mobile menu: a fixed overlay inside a blurred/transformed header gets clipped to the header */
+.header.menu-open { backdrop-filter: none; -webkit-backdrop-filter: none; transform: none; }
+
+/* custom cursor on real mouse pointers only, at any window width */
+@media (hover: hover) and (pointer: fine) {
+    *, *::before, *::after { cursor: none !important; }
+    .cursor { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .gallery-section, .gallery-item, .section-title-line { opacity: 1; transform: none; }
+}
+
+
+/* ============================================================
+   ICONS + MOTION
+   ============================================================ */
+.ico { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; vertical-align: -0.125em; }
+.item-view .ico { font-size: 12px; color: var(--white); transform: none; }
+.item-photo-count .ico { font-size: 10px; }
+.modal-nav-btn .ico { font-size: 11px; }
+
+.hero::before {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(620px circle at var(--mx, 72%) var(--my, 34%), color-mix(in srgb, var(--accent) 15%, transparent), transparent 62%);
+}
+.item-image-container { transition: transform 0.5s var(--ease-expo); will-change: transform; }
+.cta-btn { transition: color 0.4s var(--ease-expo), transform 0.5s var(--ease-expo); }
+
+.modal-image.swap { animation: imgSwap 0.8s var(--ease-expo); }
+@keyframes imgSwap { from { opacity: 0; transform: scale(1.05); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
+
+@media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+        .hero-content { animation: heroOut linear both; animation-timeline: view(); animation-range: exit 0% exit 90%; }
+        @keyframes heroOut { to { transform: translateY(-70px); opacity: 0; } }
+    }
+}
+
+
+/* ============================================================
+   FLUIDITY
+   ============================================================ */
+html.km-lerp { scroll-behavior: auto; }
+
+/* loader leaves as a curtain instead of a fade */
+.loader { clip-path: inset(0 0 0 0); }
+.loader.hidden { opacity: 1; clip-path: inset(0 0 100% 0); transition: clip-path 1.1s var(--ease-expo), visibility 0s linear 1.1s; }
+
+/* lucentia images are revealed with a wipe */
+.gallery-item:not(.eloquentia-entry) .item-image-container { clip-path: inset(0 0 100% 0); transition: clip-path 1.3s var(--ease-expo), transform 0.5s var(--ease-expo); }
+.gallery-item.visible:not(.eloquentia-entry) .item-image-container { clip-path: inset(0 0 0 0); }
+
+@media (hover: hover) {
+    .wr-col-main { transition: transform 0.7s var(--ease-expo); }
+    .eloquentia-entry:hover .wr-col-main { transform: translateX(14px); }
+}
+
+/* cheaper compositing = steadier frame rate while scrolling */
+.orb { filter: none; }
+.header.scrolled, .category-nav { backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); }
+.header.scrolled.menu-open { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.theme-toggle, .back-to-top { backdrop-filter: none; -webkit-backdrop-filter: none; background: color-mix(in srgb, var(--bg) 88%, transparent); }
+.header-progress { width: 100%; transform: scaleX(0); transform-origin: left; transition: none; }
+
+/* theme switch: circular reveal */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+html.theme-vt *, html.theme-vt *::before, html.theme-vt *::after { transition: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    .loader.hidden { clip-path: none; opacity: 0; }
+    .gallery-item .item-image-container { clip-path: none; }
 }
