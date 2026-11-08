@@ -972,13 +972,46 @@ body.light-mode .modal-nav-btn:hover { color: var(--white); background: var(--bg
     .theme-toggle { left: 16px; bottom: 16px; width: 2.375rem; height: 2.375rem; }
     .back-to-top { right: 16px; bottom: 72px; width: 2.375rem; height: 2.375rem; }
 
-    .modal { padding: 0; align-items: flex-end; }
-    .modal-content { width: 100%; max-width: 100%; border-radius: 0; max-height: 96vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    /* One scroll container for the whole dialog prevents the heading and close button
+       from being clipped by a nested, transformed .modal-content scroll area. */
+    .modal {
+        padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+        align-items: flex-start;
+        justify-content: center;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: none;
+        overflow: visible;
+        border-radius: 0;
+        flex: 0 0 auto;
+        margin: 0 auto;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
     .modal-body { border: none; border-top: 1px solid var(--white-faint); }
     .modal-media, .modal-info-panel { padding: 1.25rem; }
-    .modal-body.eloquentia-modal .modal-info-panel { padding: 5rem 1.25rem 2rem; }
+    .modal-body.eloquentia-modal .modal-info-panel { padding: 5rem 1.25rem 2.5rem; }
+    .modal-body.eloquentia-modal .modal-title {
+        font-size: clamp(1.8rem, 8vw, 2.6rem);
+        line-height: 1.12;
+        margin-bottom: 1.75rem;
+        overflow: visible;
+        overflow-wrap: anywhere;
+    }
     .modal-body.eloquentia-modal .modal-description { font-size: 1rem; line-height: 1.95; column-count: 1; }
-    .modal-close { top: 16px; right: 16px; width: 2.5rem; height: 2.5rem; }
+    .modal-close {
+        position: fixed;
+        top: calc(16px + env(safe-area-inset-top));
+        right: calc(16px + env(safe-area-inset-right));
+        width: 2.5rem;
+        height: 2.5rem;
+        z-index: 10002;
+    }
     .modal-swipe-hint { display: block; }
     .modal-nav-row { padding-top: 1rem; }
 }
