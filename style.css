@@ -1351,3 +1351,32 @@ body.light-mode .lightbox { --bg: #080808; }
 /* filter bar: it now scrolls away with the page instead of sticking over the content (down or up) */
 .category-nav { position: relative; top: auto; transition: none; }
 .category-nav.hidden { transform: none; opacity: 1; pointer-events: auto; }
+
+
+/* ============================================================
+   OPENING SEQUENCE, IMAGE FADE-IN, PRESS FEEDBACK
+   ============================================================ */
+.hero-word .ch { display: inline-block; transform-origin: left bottom; }
+.hero-title { padding-bottom: 0.08em; }
+.eyebrow-line { transform-origin: left; }
+html.hero-pre .hero-word .ch { transform: translateY(115%) rotate(5deg); }
+html.hero-pre .logo, html.hero-pre .nav-link, html.hero-pre .header-time { opacity: 0; }
+
+.item-image-container:not(.img-ready) { min-height: 16rem; background: var(--bg-3); }
+.item-image-container:not(.img-ready)::before {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.06) 50%, transparent 70%);
+    animation: kmShimmer 1.6s linear infinite;
+}
+@keyframes kmShimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.item-image { transition: transform 0.9s var(--ease-expo), filter 0.6s, opacity 0.9s var(--ease-smooth); }
+html.img-fade .item-image:not(.is-loaded), html.img-fade .item-image.is-error { opacity: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .cta-btn:active, .category-btn:active, .modal-nav-btn:active, .audio-btn:active, .theme-toggle:active,
+    .search-fab:active, .back-to-top:active, .modal-share:active, .km-pal-rand:active { scale: 0.96; }
+}
+@media (prefers-reduced-motion: reduce) { .item-image-container::before { display: none; } }
+
+/* the "featured" marker was only 55% opaque, which is too faint on the light theme */
+.wr-featured-tag.always-show { opacity: 0.85; }

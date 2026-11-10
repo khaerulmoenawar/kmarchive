@@ -1172,47 +1172,37 @@ class Portfolio {
     }
 
     startHeroAnimations() {
-        document.querySelectorAll('.hero-word').forEach((word, i) => {
-            setTimeout(() => {
-                word.style.transition = `transform 1.4s cubic-bezier(0.19,1,0.22,1), opacity 1s`;
-                word.style.transform = 'translateY(0)';
-                word.style.opacity = '1';
-            }, i * 250 + 100);
+        const root = document.documentElement;
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const E = 'cubic-bezier(0.19, 1, 0.22, 1)';
+        const show = { opacity: '1', transform: 'none' };
+        // animate from a hidden state, then commit the final look as plain styles and drop the animation
+        const run = (el, from, to, delay, dur, final) => {
+            if (!el) return;
+            Object.assign(el.style, final);
+            if (reduce) return;
+            el.animate([from, to], { duration: dur, delay, easing: E, fill: 'backwards' });
+        };
+
+        // 1. header settles in from above
+        if (!reduce) document.querySelectorAll('.logo, .nav-link, .header-time').forEach((el, i) => {
+            el.animate([{ opacity: 0, transform: 'translateY(-0.75rem)' }, { opacity: 1, transform: 'none' }], { duration: 900, delay: 60 + i * 70, easing: E, fill: 'backwards' });
         });
+        // 2. eyebrow: rule draws, text rises
+        run(document.querySelector('.hero-eyebrow'), { opacity: 0, transform: 'translateY(1.25rem)' }, { opacity: 1, transform: 'none' }, 200, 800, show);
+        const rule = document.querySelector('.eyebrow-line');
+        if (rule && !reduce) rule.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 1100, delay: 250, easing: E, fill: 'backwards' });
+        // 3. title: letter by letter through the mask
+        if (!reduce) document.querySelectorAll('.hero-word .ch').forEach((c, i) => {
+            c.animate([{ transform: 'translateY(115%) rotate(5deg)' }, { transform: 'none' }], { duration: 1100, delay: 120 + i * 38, easing: E, fill: 'backwards' });
+        });
+        // 4. supporting content follows
+        run(document.querySelector('.hero-subtitle'), { opacity: 0, transform: 'translateY(1.25rem)' }, { opacity: 1, transform: 'none' }, 900, 1000, show);
+        run(document.querySelector('.hero-cta'), { opacity: 0, transform: 'translateY(1.25rem)' }, { opacity: 1, transform: 'none' }, 1100, 800, show);
+        run(document.querySelector('.hero-index'), { opacity: 0, transform: 'translateX(1.25rem)' }, { opacity: 1, transform: 'none' }, 1400, 1000, show);
+        run(document.querySelector('.hero-scroll-indicator'), { opacity: 0 }, { opacity: 1 }, 1600, 1000, { opacity: '1' });
 
-        const eyebrow = document.querySelector('.hero-eyebrow');
-        if (eyebrow) setTimeout(() => {
-            eyebrow.style.transition = 'opacity 0.8s, transform 0.8s var(--ease-expo)';
-            eyebrow.style.opacity = '1';
-            eyebrow.style.transform = 'translateY(0)';
-        }, 200);
-
-        const subtitle = document.querySelector('.hero-subtitle');
-        if (subtitle) setTimeout(() => {
-            subtitle.style.transition = 'opacity 1s 0.1s, transform 1s var(--ease-expo)';
-            subtitle.style.opacity = '1';
-            subtitle.style.transform = 'translateY(0)';
-        }, 900);
-
-        const cta = document.querySelector('.hero-cta');
-        if (cta) setTimeout(() => {
-            cta.style.transition = 'opacity 0.8s, transform 0.8s var(--ease-expo)';
-            cta.style.opacity = '1';
-            cta.style.transform = 'translateY(0)';
-        }, 1100);
-
-        const scroll = document.querySelector('.hero-scroll-indicator');
-        if (scroll) setTimeout(() => {
-            scroll.style.transition = 'opacity 1s';
-            scroll.style.opacity = '1';
-        }, 1600);
-
-        const index = document.querySelector('.hero-index');
-        if (index) setTimeout(() => {
-            index.style.transition = 'opacity 1s, transform 1s var(--ease-expo)';
-            index.style.opacity = '1';
-            index.style.transform = 'translateX(0)';
-        }, 1400);
+        root.classList.remove('hero-pre');
     }
 }
 
@@ -1809,4 +1799,41 @@ window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
         m.content = "KM's Archive: written and visual pieces by Khaerul on love, life and memory.";
         document.head.appendChild(m);
     }
+})();
+
+
+/* ============================================================
+   OPENING SEQUENCE SETUP + IMAGE FADE-IN
+   ============================================================ */
+(() => {
+    const root = document.documentElement;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduce) {
+        root.classList.add('hero-pre');
+        setTimeout(() => root.classList.remove('hero-pre'), 7000);   // safety: never leave the header hidden
+    }
+    document.querySelectorAll('.hero-word').forEach(word => {
+        const text = word.textContent.trim();
+        word.textContent = '';
+        const label = document.createElement('span');
+        label.className = 'sr'; label.textContent = text;
+        word.appendChild(label);
+        [...text].forEach(c => {
+            const ch = document.createElement('span');
+            ch.className = 'ch'; ch.setAttribute('aria-hidden', 'true'); ch.textContent = c === ' ' ? '\u00a0' : c;
+            word.appendChild(ch);
+        });
+        word.style.opacity = '1'; word.style.transform = 'none'; word.style.willChange = 'auto';
+    });
+
+    // photos fade in when they arrive instead of popping; a skeleton holds their space meanwhile
+    root.classList.add('img-fade');
+    const ready = (img, cls) => {
+        img.classList.add('is-loaded');
+        if (cls) img.classList.add(cls);
+        if (img.parentElement) img.parentElement.classList.add('img-ready');
+    };
+    document.addEventListener('load', e => { const t = e.target; if (t && t.classList && t.classList.contains('item-image')) ready(t); }, true);
+    document.addEventListener('error', e => { const t = e.target; if (t && t.classList && t.classList.contains('item-image')) ready(t, 'is-error'); }, true);
+    setTimeout(() => document.querySelectorAll('.item-image:not(.is-loaded)').forEach(i => ready(i)), 9000);   // safety net
 })();
