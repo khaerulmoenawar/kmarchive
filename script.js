@@ -193,7 +193,7 @@ class Portfolio {
         this.audio.loop = true;
         this.isAudioPlaying = false;
         let saved = null; try { saved = localStorage.getItem('km-theme'); } catch (e) {}
-        this.isDark = saved ? saved === 'dark' : !matchMedia('(prefers-color-scheme: light)').matches;
+        this.isDark = saved ? saved === 'dark' : true;   // dark is the designed default
         this.finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
         this._pushed = false;
         this._lastFocus = null;
@@ -225,6 +225,9 @@ class Portfolio {
         this.setupScrollHandlers();
         this.setupMobileNav();
         this.setupTouchGestures();
+        this.setupShare();
+        this.setupModalProgress();
+        this.openFromHash();
         this.idle(() => this.setupFx());
         if (this.finePointer) this.tickCursor();
 
@@ -531,6 +534,89 @@ class Portfolio {
 
     _docH() { return this._dh || (this._dh = document.documentElement.scrollHeight); }
 
+    warm(item) {
+        (item.images || []).slice(0, 2).forEach(src => { const i = new Image(); i.decoding = 'async'; i.src = src; });
+    }
+
+    setInert(on) {
+        document.querySelectorAll('.header, .hero, .category-nav, .gallery-section').forEach(el => el.toggleAttribute('inert', on));
+    }
+
+    toast(msg) {
+        let t = document.querySelector('.km-toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.className = 'km-toast'; t.setAttribute('role', 'status');
+            document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(this._toastT);
+        this._toastT = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    setupShare() {
+        const row = document.querySelector('.modal-nav-row');
+        if (!row || document.querySelector('.modal-share')) return;
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'modal-share'; b.textContent = 'Copy link';
+        b.addEventListener('click', async () => {
+            const url = location.href;
+            const title = (document.getElementById('modalTitle') || {}).textContent || document.title;
+            try {
+                if (navigator.share && matchMedia('(pointer: coarse)').matches) { await navigator.share({ title, url }); return; }
+                await navigator.clipboard.writeText(url);
+                this.toast('Link copied');
+            } catch (e) { if (!e || e.name !== 'AbortError') this.toast(url); }
+        });
+        row.parentNode.insertBefore(b, row);
+    }
+
+    setupModalProgress() {
+        const modal = document.getElementById('detailModal');
+        if (!modal || document.querySelector('.modal-progress')) return;
+        const bar = document.createElement('div');
+        bar.className = 'modal-progress'; bar.setAttribute('aria-hidden', 'true');
+        modal.appendChild(bar);
+        let raf = 0;
+        modal.addEventListener('scroll', () => {
+            if (raf) return;
+            raf = requestAnimationFrame(() => {
+                raf = 0;
+                const max = modal.scrollHeight - modal.clientHeight;
+                bar.style.transform = `scaleX(${max > 0 ? modal.scrollTop / max : 0})`;
+            });
+        }, { passive: true });
+    }
+
+    openFromHash() {
+        const hit = location.hash.match(/^#piece-(.+)$/);
+        if (!hit) return;
+        const it = this.allItems.find(i => i.id === decodeURIComponent(hit[1]));
+        if (!it) return;
+        history.replaceState(null, '', location.pathname + location.search);
+        setTimeout(() => this.openModal(it), 2600);
+    }
+
+    // View Transitions are the heaviest effect. Use them only where they run smoothly.
+    _vtOK() {
+        return !!document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches
+            && !document.documentElement.classList.contains('lite');
+    }
+
+    // If a transition plays below ~30fps, switch to lite mode so later ones are skipped.
+    _watchFrames(t) {
+        t.ready.then(() => {
+            let n = 0, sum = 0, last = performance.now();
+            const f = now => {
+                sum += now - last; last = now;
+                if (++n < 20) requestAnimationFrame(f);
+                else if (sum / n > 34) document.documentElement.classList.add('lite');
+            };
+            requestAnimationFrame(f);
+        }).catch(() => {});
+    }
+
     idle(fn) { (window.requestIdleCallback || (f => setTimeout(f, 60)))(fn, { timeout: 1500 }); }
 
     scrollToY(y) {
@@ -594,6 +680,8 @@ class Portfolio {
         el.setAttribute('role', 'button');
         el.setAttribute('aria-label', `Open ${item.title}`);
         el._kmItem = item;
+        el.addEventListener('pointerenter', () => this.warm(item), { once: true, passive: true });
+        el.addEventListener('focus', () => this.warm(item), { once: true });
         el.addEventListener('click', () => this.openFrom(el, item));
         el.addEventListener('keydown', e => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.openFrom(el, item); }
@@ -649,21 +737,20 @@ class Portfolio {
     setupIntersectionObservers() {
         const sections = document.querySelectorAll('.gallery-section, .hero');
     
-    const sectionObs = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add('active');
+    // reveal: any overlap counts (a ratio threshold can never be reached by a section taller than the screen)
+    const reveal = new IntersectionObserver(entries => entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('active');
+        reveal.unobserve(e.target);
+    }), { threshold: 0, rootMargin: '0px 0px -8% 0px' });
 
-            const id = entry.target.id;
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
-            });
-        });
-    }, { threshold: 0.2, rootMargin: '-80px' });
-    
-    sections.forEach(s => {
-        if (s.id) sectionObs.observe(s);
-    });
+    // nav highlight: the section crossing a thin band at mid-screen
+    const spy = new IntersectionObserver(entries => entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${e.target.id}`));
+    }), { threshold: 0, rootMargin: '-45% 0px -54% 0px' });
+
+    sections.forEach(s => { if (s.id) { reveal.observe(s); spy.observe(s); } });
 
     const itemObs = new IntersectionObserver(entries => {
         entries.forEach((entry, i) => {
@@ -747,14 +834,19 @@ class Portfolio {
 
         if (!modal.classList.contains('active')) {
             this._lastFocus = document.activeElement;
-            history.pushState({ km: 'modal' }, '');
+            history.pushState({ km: 'modal' }, '', '#piece-' + item.id);
             this._pushed = true;
+            this.setInert(true);
+            requestAnimationFrame(() => { const c = document.getElementById('modalClose'); if (c) c.focus({ preventScroll: true }); });
+        } else {
+            history.replaceState({ km: 'modal' }, '', '#piece-' + item.id);
         }
         modal.classList.add('active');
         document.body.classList.add('modal-open');
         document.getElementById('header')?.classList.remove('nav-hidden');
 
-        setTimeout(() => { modal.scrollTop = 0; }, 10);
+        setTimeout(() => { modal.scrollTop = 0;
+        const pb = document.querySelector('.modal-progress'); if (pb) pb.style.transform = 'scaleX(0)'; }, 10);
 
         setTimeout(() => {
             document.getElementById('modalClose')?.focus();
@@ -764,7 +856,7 @@ class Portfolio {
     openFrom(el, item) {
         const img = el.querySelector ? el.querySelector('.item-image') : null;
         let ok = false;
-        if (img && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (img && this._vtOK()) {
             const r = img.getBoundingClientRect();
             ok = r.bottom > 0 && r.top < innerHeight;
         }
@@ -778,6 +870,7 @@ class Portfolio {
             try { await Promise.race([mi.decode(), new Promise(r => setTimeout(r, 400))]); } catch (e) {}
         });
         t.finished.catch(() => {});
+        this._watchFrames(t);
     }
 
     closeModal() {
@@ -786,19 +879,21 @@ class Portfolio {
         const card = this._srcCard && this._srcCard.isConnected ? this._srcCard : null;
         const img = card ? card.querySelector('.item-image') : null;
         let ok = false;
-        if (img && card._kmItem === this.currentItem && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (img && card._kmItem === this.currentItem && this._vtOK()) {
             const r = img.getBoundingClientRect();
             ok = r.bottom > 0 && r.top < innerHeight;
         }
         if (!ok) return this._closeModalNow();
         const t = document.startViewTransition(() => { this._closeModalNow(); img.style.viewTransitionName = 'km-hero'; });
         t.finished.finally(() => { img.style.viewTransitionName = ''; });
+        this._watchFrames(t);
     }
 
     _closeModalNow() {
         const modal = document.getElementById('detailModal');
         if (!modal.classList.contains('active')) return;
         modal.classList.remove('active');
+        this.setInert(false);
         document.body.classList.remove('modal-open');
         document.querySelector('.modal-content')?.removeAttribute('style');
         this.currentItem = null;
@@ -881,6 +976,7 @@ class Portfolio {
     sortAndRedraw(criteria) {
         const ts = this._ts || (this._ts = new Map(this.allItems.map(it =>
             [it, new Date(it.date.replace(/(\w+)\s(\d{4})/, '$1 1 $2')).getTime()])));
+        if (!this._cards) document.querySelectorAll('.eloquentia-gallery, .lucentia-gallery').forEach(g => { g.innerHTML = ''; });
         const cards = this._cards || (this._cards = new Map());
         const sorted = [...this.allItems].sort((a, b) => {
             if (criteria === 'date')     return ts.get(b) - ts.get(a);
@@ -908,6 +1004,7 @@ class Portfolio {
             const grid = document.querySelector(`.${cat}-gallery`);
             if (grid) grid.appendChild(frags[cat]);
         });
+        // replay the reveal, same as before
         requestAnimationFrame(() => setTimeout(() => {
             cards.forEach(card => card.classList.add('visible'));
         }, 60));
@@ -1011,7 +1108,7 @@ class Portfolio {
             this.applyTheme();
         };
         const btn = document.getElementById('themeToggle');
-        if (!document.startViewTransition || !btn || matchMedia('(prefers-reduced-motion: reduce)').matches) return flip();
+        if (!this._vtOK() || !btn) return flip();
         const r = btn.getBoundingClientRect();
         const x = r.left + r.width / 2, y = r.top + r.height / 2;
         const rad = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
@@ -1023,6 +1120,7 @@ class Portfolio {
             { duration: 800, easing: 'cubic-bezier(0.19, 1, 0.22, 1)', pseudoElement: '::view-transition-new(root)' }
         )).catch(() => {});
         t.finished.finally(() => root.classList.remove('theme-vt'));
+        this._watchFrames(t);
     }
 
 
@@ -1032,90 +1130,45 @@ class Portfolio {
         const headerProg  = document.getElementById('headerProgress');
         const backToTop   = document.getElementById('backToTop');
         const categoryNav = document.getElementById('categoryNav');
-        const mobileQuery = window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)');
 
         let lastY = window.scrollY;
-        let lastRenderedY = lastY;
+        let anchorY = window.scrollY;
         let ticking = false;
 
-        const updateMobileNavigation = (y, delta) => {
-            if (!mobileQuery.matches) {
-                header?.classList.remove('nav-hidden');
-                return;
-            }
-
-            const menuIsOpen = header?.classList.contains('menu-open');
-
-            // Keep the navigation visible at the very top and while its menu is open.
-            if (menuIsOpen || y <= 2) {
-                header?.classList.remove('nav-hidden');
-                categoryNav?.classList.remove('hidden');
-                return;
-            }
-
-            // No movement means keep the current state: hidden stays hidden after scrolling down.
-            if (delta > 0) {
-                header?.classList.add('nav-hidden');
-                categoryNav?.classList.add('hidden');
-            } else if (delta < 0) {
-                header?.classList.remove('nav-hidden');
-                categoryNav?.classList.remove('hidden');
-            }
-        };
-
-        // If the page is restored at a previous scroll position, start hidden on mobile.
-        if (mobileQuery.matches && lastY > 2) {
-            header?.classList.add('nav-hidden');
-            categoryNav?.classList.add('hidden');
-        }
-
         window.addEventListener('scroll', () => {
-            const y = window.scrollY;
-            const delta = y - lastY;
-
-            // Update navigation immediately, outside requestAnimationFrame, so tiny/slow
-            // scroll movements are not lost to the visual-update throttle.
-            updateMobileNavigation(y, delta);
-            lastY = y;
-
             if (ticking) return;
-            ticking = true;
             requestAnimationFrame(() => {
-                const currentY = window.scrollY;
+                const y = window.scrollY;
                 const maxScroll = this._docH() - window.innerHeight;
-                const pct = maxScroll > 0 ? (currentY / maxScroll) * 100 : 0;
+                const pct = maxScroll > 0 ? (y / maxScroll) * 100 : 0;
 
-                header?.classList.toggle('scrolled', currentY > 60);
+                header?.classList.toggle('scrolled', y > 60);
                 if (headerProg) headerProg.style.transform = `scaleX(${pct / 100})`;
-                backToTop?.classList.toggle('visible', currentY > 600);
+                backToTop?.classList.toggle('visible', y > 600);
 
-                // Preserve the original desktop category-bar behavior.
-                if (categoryNav && !mobileQuery.matches) {
-                    const pastHero = currentY > window.innerHeight * 0.7;
-                    const scrollingDown = currentY > lastRenderedY + 5;
+                if (this.isMobile && header) {
+                const pastHeroMobile = y > 80;
+                if (y > lastY) {
+                    anchorY = y;
+                    if (pastHeroMobile) header.classList.add('nav-hidden');
+                } else {
+                    if (anchorY - y > 60 || y < 60) {
+                        header.classList.remove('nav-hidden');
+                    }
+                }
+                }
+
+                if (categoryNav) {
+                    const pastHero = y > window.innerHeight * 0.7;
+                    const scrollingDown = y > lastY + 5;
                     categoryNav.classList.toggle('hidden', pastHero && scrollingDown);
                 }
 
-                lastRenderedY = currentY;
+                lastY = y;
                 ticking = false;
             });
+            ticking = true;
         }, { passive: true });
-
-        const syncAfterViewportChange = () => {
-            lastY = window.scrollY;
-            if (!mobileQuery.matches) {
-                header?.classList.remove('nav-hidden');
-            } else if (lastY > 2 && !header?.classList.contains('menu-open')) {
-                header?.classList.add('nav-hidden');
-                categoryNav?.classList.add('hidden');
-            }
-        };
-
-        if (mobileQuery.addEventListener) {
-            mobileQuery.addEventListener('change', syncAfterViewportChange);
-        } else if (mobileQuery.addListener) {
-            mobileQuery.addListener(syncAfterViewportChange);
-        }
     }
 
     startHeroAnimations() {
@@ -1164,7 +1217,7 @@ class Portfolio {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new Portfolio();
+    window.kmPortfolio = new Portfolio();
 });
 
 if (window.innerWidth <= 768) {
@@ -1173,7 +1226,9 @@ if (window.innerWidth <= 768) {
     });
 }
 
-
+/* ============================================================
+   FULLSCREEN LIGHTBOX
+   ============================================================ */
 class Lightbox {
     constructor() {
         this.el       = document.getElementById('lightbox');
@@ -1187,6 +1242,7 @@ class Lightbox {
         this.index    = 0;
         this.isOpen   = false;
 
+        // Zoom / pan state
         this.scale    = 1;
         this.panX     = 0;
         this.panY     = 0;
@@ -1197,6 +1253,7 @@ class Lightbox {
         this.lastPanY = 0;
         this.zoomHintTimer = null;
 
+        // Touch
         this.touchStartX  = 0;
         this.touchStartY  = 0;
         this.touchLastDist = 0;
@@ -1206,12 +1263,15 @@ class Lightbox {
     }
 
     _bind() {
+        // Close buttons
         document.getElementById('lbClose')?.addEventListener('click', () => this.close());
         document.getElementById('lbBackdrop')?.addEventListener('click', () => this.close());
 
+        // Nav
         document.getElementById('lbPrev')?.addEventListener('click', () => this.navigate(-1));
         document.getElementById('lbNext')?.addEventListener('click', () => this.navigate(1));
 
+        // Keyboard
         document.addEventListener('keydown', e => {
             if (!this.isOpen) return;
             if (e.key === 'Escape')      this.close();
@@ -1222,6 +1282,7 @@ class Lightbox {
             if (e.key === '0')           this._resetZoom();
         });
 
+        // Mouse zoom (click to toggle)
         this.imgWrap.addEventListener('click', e => {
             if (this.isDragging) return;
             if (this.scale > 1) {
@@ -1231,12 +1292,14 @@ class Lightbox {
             }
         });
 
+        // Mouse wheel zoom
         this.imgWrap.addEventListener('wheel', e => {
             e.preventDefault();
             const delta = e.deltaY < 0 ? 0.18 : -0.18;
             this._zoomStep(delta, e.clientX, e.clientY);
         }, { passive: false });
 
+        // Mouse drag for panning
         this.imgWrap.addEventListener('mousedown', e => {
             if (this.scale <= 1) return;
             this.isDragging = true;
@@ -1255,11 +1318,13 @@ class Lightbox {
             setTimeout(() => { this.isDragging = false; }, 10);
         });
 
+        // Touch events
         this.el.addEventListener('touchstart', e => this._onTouchStart(e), { passive: false });
         this.el.addEventListener('touchmove',  e => this._onTouchMove(e),  { passive: false });
         this.el.addEventListener('touchend',   e => this._onTouchEnd(e),   { passive: false });
     }
 
+    // ── Public: open with an array of image srcs, start at index ──
     open(images, index, seriesTitle) {
         this.images      = images;
         this.index       = index;
@@ -1271,6 +1336,7 @@ class Lightbox {
         document.body.classList.add('lb-open');
         this.isOpen = true;
 
+        // Show mobile swipe hint once
         if (!this._swipeHintShown && window.innerWidth <= 768 && images.length > 1) {
             this._swipeHintShown = true;
             const hint = document.createElement('div');
@@ -1293,6 +1359,7 @@ class Lightbox {
         if (this.images.length <= 1) return;
         this._resetZoom(false);
 
+        // Slide-out animation
         const slideOut = dir > 0 ? '-60px' : '60px';
         this.img.style.transition = 'transform 0.22s ease, opacity 0.22s';
         this.img.style.transform  = `scale(0.94) translateX(${slideOut})`;
@@ -1301,6 +1368,7 @@ class Lightbox {
         setTimeout(() => {
             this.index = (this.index + dir + this.images.length) % this.images.length;
             this._load(this.index);
+            // Slide in from opposite
             this.img.style.transition = 'none';
             this.img.style.transform  = `scale(0.94) translateX(${dir > 0 ? '60px' : '-60px'})`;
             requestAnimationFrame(() => {
@@ -1319,15 +1387,18 @@ class Lightbox {
         this.title.textContent   = this.seriesTitle;
         this.counter.textContent = `${String(idx + 1).padStart(2,'0')} / ${String(this.images.length).padStart(2,'0')}`;
 
+        // Show prev/next only if multiple images
         const showNav = this.images.length > 1;
         document.getElementById('lbPrev').style.display = showNav ? '' : 'none';
         document.getElementById('lbNext').style.display = showNav ? '' : 'none';
     }
 
+    // ── Zoom helpers ──
     _zoomStep(delta, cx, cy) {
         const newScale = Math.min(Math.max(this.scale + delta, 1), 5);
         if (newScale === this.scale) return;
         if (cx !== undefined) {
+            // Zoom toward cursor
             const rect = this.img.getBoundingClientRect();
             const ox = cx - (rect.left + rect.width  / 2);
             const oy = cy - (rect.top  + rect.height / 2);
@@ -1356,6 +1427,7 @@ class Lightbox {
     _resetZoom(animate = true) {
         this.scale = 1; this.panX = 0; this.panY = 0;
         this.imgWrap.classList.remove('lb-zoomed');
+        // Let CSS handle the transition when animate=true
         if (!animate) {
             this.imgWrap.style.transition = 'none';
             this.imgWrap.style.transform  = 'translate(0,0) scale(1)';
@@ -1382,6 +1454,7 @@ class Lightbox {
         }, 1200);
     }
 
+    // ── Touch ──
     _onTouchStart(e) {
         if (e.touches.length === 2) {
             this.touchPinching  = true;
@@ -1442,31 +1515,56 @@ class Lightbox {
     }
 }
 
+// ── Wire up Lightbox to the Portfolio modal image ──
 document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('lightbox')) {
+        const X = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">';
+        document.body.insertAdjacentHTML('beforeend',
+            '<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">' +
+            '<div class="lb-backdrop" id="lbBackdrop"></div>' +
+            '<div class="lb-img-wrap" id="lbImgWrap"><img class="lb-img" id="lbImg" alt="" draggable="false"></div>' +
+            '<button class="lb-btn lb-close" id="lbClose" aria-label="Close viewer">' + X + '<path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
+            '<button class="lb-btn lb-prev" id="lbPrev" aria-label="Previous image">' + X + '<path d="M15 5l-7 7 7 7"/></svg></button>' +
+            '<button class="lb-btn lb-next" id="lbNext" aria-label="Next image">' + X + '<path d="M9 5l7 7-7 7"/></svg></button>' +
+            '<div class="lb-meta"><span id="lbTitle"></span><span id="lbCounter"></span></div>' +
+            '<div class="lb-hint" id="lbZoomHint">Scroll or double-tap to zoom</div></div>');
+    }
     const lb = new Lightbox();
 
+    // Hook: whenever the modal image is clicked, open lightbox
     document.getElementById('modalImage')?.addEventListener('click', () => {
+        // Find which item is currently in the modal via the global Portfolio instance
         const modal = document.getElementById('detailModal');
         if (!modal.classList.contains('active')) return;
 
+        // Collect images from the currently active thumbnail gallery
         const thumbs = Array.from(document.querySelectorAll('.modal-gallery-item img'));
         const images = thumbs.length
             ? thumbs.map(img => img.src)
             : [document.getElementById('modalImage').src];
 
+        // Find which thumbnail is active = current index
         const activeThumb = document.querySelector('.modal-gallery-item.active img');
         const currentSrc  = document.getElementById('modalImage').src;
         let startIdx = images.findIndex(s => s === currentSrc);
         if (startIdx < 0) startIdx = 0;
 
+        // Get series title from modal
         const seriesTitle = document.getElementById('modalTitle')?.textContent || '';
         lb.open(images, startIdx, seriesTitle);
     });
 
+    // Also wire gallery thumbnails — clicking a thumb then clicking the main image should be in sync
+    // We re-use the existing thumbnail click logic — no changes needed there.
+
+    // Expose lb globally so Portfolio can call lb.open() directly if needed
     window._km_lightbox = lb;
 });
 
 
+/* ============================================================
+   ICONS: inline SVG, swaps <i class="fas fa-*"> automatically
+   ============================================================ */
 (() => {
     const F = 'fill="currentColor"';
     const P = {
@@ -1502,11 +1600,19 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 
+/* ============================================================
+   DIAGNOSTICS + ADAPTIVE QUALITY
+   ?perf            live fps / long-frame readout
+   ?fx=-glow,-tilt  switch single effects off (canvas, glow, tilt, cta)
+   ?nolite          never auto-switch to lite mode
+   Lite mode only turns on if frames stay slow while you scroll or move the mouse.
+   ============================================================ */
 window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
 (() => {
     const q = new URLSearchParams(location.search);
     (q.get('fx') || '').split(',').forEach(t => { if (t[0] === '-' && t.slice(1) in KM_FX) KM_FX[t.slice(1)] = false; });
     const root = document.documentElement;
+    if ((navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2) root.classList.add('lite');
     let box = null, frames = 0, long = 0, worst = 0, t0 = 0, last = 0, active = 0, probe = 0, sum = 0;
     const touch = () => { active = performance.now() + 300; };
     addEventListener('scroll', touch, { passive: true });
@@ -1536,6 +1642,9 @@ window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
 })();
 
 
+/* ============================================================
+   TYPOGRAPHY MOTION: kinetic titles, scroll-read quote, count-up numbers
+   ============================================================ */
 (() => {
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const sr = (el, text) => {
@@ -1591,5 +1700,113 @@ window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
             requestAnimationFrame(run);
         }), { threshold: 0.6 });
         nums.forEach(n => io.observe(n));
+    }
+})();
+
+
+/* ============================================================
+   SEARCH PALETTE  ( / or Ctrl+K, or the search button )
+   Built on first use, so it costs nothing at load.
+   ============================================================ */
+(() => {
+    let root = null, input = null, list = null, items = [], active = 0, hay = null, last = null;
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const index = () => hay || (hay = [
+        ...portfolioData.eloquentia.map(it => ({ it, cat: 'Eloquentia' })),
+        ...portfolioData.lucentia.map(it => ({ it, cat: 'Lucentia' }))
+    ].map(x => Object.assign(x, {
+        text: [x.it.title, x.it.category, x.it.type, x.it.date, x.it.id, x.cat, (x.it.description || '').replace(/<[^>]+>/g, ' ')].join(' ').toLowerCase()
+    })));
+
+    const render = () => {
+        const toks = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        const inTitle = x => (toks.length && x.it.title.toLowerCase().includes(toks[0])) ? 1 : 0;
+        items = index().filter(x => toks.every(t => x.text.includes(t))).sort((a, b) => inTitle(b) - inTitle(a)).slice(0, 8);
+        active = 0;
+        list.innerHTML = items.length
+            ? items.map((x, i) => '<li role="option" class="km-pal-item' + (i ? '' : ' on') + '" data-i="' + i + '"><span class="km-pal-title">' + esc(x.it.title) +
+                '</span><span class="km-pal-meta">' + x.cat + ' · ' + esc(x.it.category) + ' · ' + esc(x.it.date) + '</span></li>').join('')
+            : '<li class="km-pal-empty">Nothing found</li>';
+    };
+    const setActive = i => {
+        if (!items.length) return;
+        active = (i + items.length) % items.length;
+        list.querySelectorAll('.km-pal-item').forEach((el, k) => { el.classList.toggle('on', k === active); if (k === active) el.scrollIntoView({ block: 'nearest' }); });
+    };
+    const isOpen = () => !!root && root.classList.contains('on');
+    const close = (restore = true) => {
+        if (!isOpen()) return;
+        root.classList.remove('on'); document.body.classList.remove('pal-open');
+        if (restore && last && last.focus) last.focus({ preventScroll: true });
+    };
+    const choose = it => { close(false); if (it && window.kmPortfolio) window.kmPortfolio.openModal(it); };
+    const random = () => { const a = index(); choose(a[Math.floor(Math.random() * a.length)].it); };
+
+    const build = () => {
+        root = document.createElement('div');
+        root.className = 'km-pal'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'Search the archive');
+        root.innerHTML = '<div class="km-pal-backdrop"></div><div class="km-pal-box">' +
+            '<input class="km-pal-input" type="search" placeholder="Search the archive…" aria-label="Search the archive" autocomplete="off" spellcheck="false">' +
+            '<ul class="km-pal-list" role="listbox"></ul>' +
+            '<div class="km-pal-foot"><span>↑↓ navigate &nbsp; ↵ open &nbsp; esc close</span><button type="button" class="km-pal-rand">Random piece</button></div></div>';
+        document.body.appendChild(root);
+        input = root.querySelector('.km-pal-input'); list = root.querySelector('.km-pal-list');
+        input.addEventListener('input', render);
+        root.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+            else if (e.key === 'Enter') { e.preventDefault(); if (items[active]) choose(items[active].it); }
+            else if (e.key === 'Escape') { e.preventDefault(); close(); }
+            else if (e.key === 'Tab') { e.preventDefault(); (document.activeElement === input ? root.querySelector('.km-pal-rand') : input).focus(); }
+        });
+        root.querySelector('.km-pal-backdrop').addEventListener('click', () => close());
+        root.querySelector('.km-pal-rand').addEventListener('click', random);
+        list.addEventListener('click', e => { const li = e.target.closest('.km-pal-item'); if (li) choose(items[+li.dataset.i].it); });
+        list.addEventListener('mousemove', e => { const li = e.target.closest('.km-pal-item'); if (li && +li.dataset.i !== active) setActive(+li.dataset.i); });
+    };
+    const open = () => {
+        const b = document.body.classList;
+        if (b.contains('modal-open') || b.contains('lb-open')) return;
+        if (!root) build();
+        last = document.activeElement;
+        root.classList.add('on'); b.add('pal-open');
+        input.value = ''; render();
+        requestAnimationFrame(() => input.focus());
+    };
+
+    document.addEventListener('keydown', e => {
+        const t = e.target;
+        const typing = !!t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable);
+        const slash = e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey;
+        const k = (e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k';
+        if (slash || k) { e.preventDefault(); isOpen() ? close() : open(); }
+    });
+
+    const fab = document.createElement('button');
+    fab.type = 'button'; fab.className = 'search-fab'; fab.setAttribute('aria-label', 'Search the archive (press /)');
+    fab.innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+    fab.addEventListener('click', open);
+    document.body.appendChild(fab);
+})();
+
+
+/* ============================================================
+   DOCUMENT STRUCTURE (accessibility + SEO fallbacks; real <main> and <meta> in the HTML are better)
+   ============================================================ */
+(() => {
+    document.querySelectorAll('.gallery-grid[role="list"]').forEach(g => g.removeAttribute('role'));
+    const hero = document.querySelector('.hero');
+    if (hero && !document.querySelector('main')) {
+        const main = document.createElement('main');
+        main.id = 'main';
+        hero.parentNode.insertBefore(main, hero);
+        let n = hero;
+        while (n && !n.matches('.modal, script, .lightbox, .km-pal')) { const next = n.nextElementSibling; main.appendChild(n); n = next; }
+    }
+    if (!document.querySelector('meta[name="description"]')) {
+        const m = document.createElement('meta');
+        m.name = 'description';
+        m.content = "KM's Archive: written and visual pieces by Khaerul on love, life and memory.";
+        document.head.appendChild(m);
     }
 })();
