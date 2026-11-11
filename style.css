@@ -1401,3 +1401,10 @@ html.img-fade .item-image:not(.is-loaded), html.img-fade .item-image.is-error { 
     .modal-image { max-height: calc(100vh - 13rem); }
 }
 @supports (height: 100dvh) { @media (min-width: 1101px) { .modal-image { max-height: calc(100dvh - 13rem); } } }
+
+/* phone bottom sheet: it was anchored with align-items:flex-end and sized in vh, so on real phones (address bar) its top was pushed off-screen where it cannot be scrolled to */
+@media (max-width: 640px) {
+    .modal { align-items: flex-start; }
+    .modal-content { margin-top: auto; max-height: 96vh; }
+}
+@supports (height: 100dvh) { @media (max-width: 640px) { .modal-content { max-height: 96dvh; } } }
