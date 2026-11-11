@@ -662,7 +662,7 @@ class Portfolio {
                 if (card !== tilted) { if (tilted) tilted.style.transform = ''; tilted = card; }
                 if (cr) {
                     const px = (x - cr.left) / cr.width - 0.5, py = (y - cr.top) / cr.height - 0.5;
-                    card.style.transform = `perspective(900px) rotateY(${px * 6}deg) rotateX(${-py * 6}deg)`;
+                    card.style.transform = `perspective(900px) rotateY(${px * 4}deg) rotateX(${-py * 4}deg)`;
                 }
                 if (br) {
                     const dx = x - (br.left + br.width / 2), dy = y - (br.top + br.height / 2);
@@ -1428,6 +1428,12 @@ class Lightbox {
     }
 
     _applyTransform(smooth) {
+        if (this.scale > 1) {            // keep the zoomed photo inside reach: its top and bottom edges can always be panned into view
+            const w = this.img.offsetWidth * this.scale, h = this.img.offsetHeight * this.scale;
+            const mx = Math.max(0, (w - innerWidth) / 2), my = Math.max(0, (h - innerHeight) / 2);
+            this.panX = Math.min(Math.max(this.panX, -mx), mx);
+            this.panY = Math.min(Math.max(this.panY, -my), my);
+        }
         this.imgWrap.style.transition = smooth
             ? 'transform 0.35s cubic-bezier(0.19,1,0.22,1)'
             : 'none';

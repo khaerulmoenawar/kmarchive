@@ -1380,3 +1380,24 @@ html.img-fade .item-image:not(.is-loaded), html.img-fade .item-image.is-error { 
 
 /* the "featured" marker was only 55% opaque, which is too faint on the light theme */
 .wr-featured-tag.always-show { opacity: 0.85; }
+
+/* phone: the thumbnail row used to force the modal wider than the screen and clip the text */
+.modal-media, .modal-info-panel { min-width: 0; }
+.modal-gallery { min-width: 0; max-width: 100%; }
+@media (hover: none) { .km-pal-foot > span { display: none; } .km-pal-foot { justify-content: flex-end; } }
+
+/* fully opaque, so page text never ghosts through an open piece (the blur that used to hide it was removed for speed) */
+.modal-backdrop { background: var(--bg); }
+
+/* the image viewer covers everything, so its backdrop is solid (no ghosting of the piece behind it) */
+.lb-backdrop { background: #050505; }
+
+/* image viewer: size by the visible screen (phone browser bars), never taller than what is actually on screen */
+@supports (height: 100dvh) { .lb-img { max-height: min(84vh, calc(100dvh - 8rem)); } }
+
+/* open piece (desktop): the photo stays fully on screen while you scroll down to read the description */
+@media (min-width: 1101px) {
+    .modal-media { position: sticky; top: 1.25rem; align-self: start; }
+    .modal-image { max-height: calc(100vh - 13rem); }
+}
+@supports (height: 100dvh) { @media (min-width: 1101px) { .modal-image { max-height: calc(100dvh - 13rem); } } }
