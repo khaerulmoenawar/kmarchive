@@ -1408,3 +1408,20 @@ html.img-fade .item-image:not(.is-loaded), html.img-fade .item-image.is-error { 
     .modal-content { margin-top: auto; max-height: 96vh; }
 }
 @supports (height: 100dvh) { @media (max-width: 640px) { .modal-content { max-height: 96dvh; } } }
+
+
+/* ============================================================
+   PHONE: the open piece is one plain scrolling page (no bottom sheet, no vh heights),
+   so its top can always be reached and nothing is pushed off-screen by the browser bars
+   ============================================================ */
+@media (max-width: 640px) {
+    .modal { display: block; padding: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+    .modal-content, .modal.active .modal-content { margin: 0; width: 100%; max-width: 100%; min-height: 100%; max-height: none; overflow: visible; transform: none; padding-top: env(safe-area-inset-top); }
+    .modal-close { position: fixed; top: calc(env(safe-area-inset-top) + 0.75rem); right: 0.75rem; z-index: 6; background: rgba(8, 8, 8, 0.72); }
+    body.light-mode .modal-close { background: rgba(245, 245, 240, 0.8); }
+}
+/* scroll-linked effects use the main thread on some phone browsers and flicker near the page end: pointer devices only */
+@media (hover: none), (pointer: coarse) {
+    .item-image, .section-number { animation: none !important; }
+    .about-quote blockquote .w { animation: none !important; opacity: 1 !important; }
+}

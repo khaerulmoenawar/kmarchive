@@ -1138,8 +1138,8 @@ class Portfolio {
         window.addEventListener('scroll', () => {
             if (ticking) return;
             requestAnimationFrame(() => {
-                const y = window.scrollY;
                 const maxScroll = this._docH() - window.innerHeight;
+                const y = Math.min(Math.max(window.scrollY, 0), Math.max(maxScroll, 0));   // iOS rubber-banding reports positions outside the page
                 const pct = maxScroll > 0 ? (y / maxScroll) * 100 : 0;
 
                 header?.classList.toggle('scrolled', y > 60);
@@ -1148,10 +1148,10 @@ class Portfolio {
 
                 if (this.isMobile && header) {
                 const pastHeroMobile = y > 80;
-                if (y > lastY) {
+                if (y > lastY + 2) {
                     anchorY = y;
                     if (pastHeroMobile) header.classList.add('nav-hidden');
-                } else {
+                } else if (y < lastY - 2) {
                     if (anchorY - y > 60 || y < 60) {
                         header.classList.remove('nav-hidden');
                     }
@@ -1686,7 +1686,7 @@ window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
             if (!e.isIntersecting) return;
             io.unobserve(e.target);
             const el = e.target, to = parseInt(el.textContent, 10);
-            if (isNaN(to)) return;
+            if (isNaN(to) || to > 100) return;   // years and big numbers stay still; only small counts animate
             const from = to > 100 ? to - 60 : 0, t0 = performance.now();
             const run = now => {
                 const p = Math.min((now - t0) / 1800, 1);
