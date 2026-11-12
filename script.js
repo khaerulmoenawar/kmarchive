@@ -1604,10 +1604,15 @@ document.addEventListener('DOMContentLoaded', () => {
    Lite mode only turns on if frames stay slow while you scroll or move the mouse.
    ============================================================ */
 window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
+window.KM_BUILD = '2026-11-12c';   // shown by ?perf, so you can check that the deployed JS and CSS match
 (() => {
     const q = new URLSearchParams(location.search);
     (q.get('fx') || '').split(',').forEach(t => { if (t[0] === '-' && t.slice(1) in KM_FX) KM_FX[t.slice(1)] = false; });
     const root = document.documentElement;
+    const buildLine = () => {
+        const css = getComputedStyle(root).getPropertyValue('--km-build').replace(/["'\s]/g, '');
+        return `build  js:${KM_BUILD}  css:${css || 'none'}  ${css === KM_BUILD ? 'OK' : 'MISMATCH: an old file is deployed or cached'}`;
+    };
     if ((navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2) root.classList.add('lite');
     let box = null, frames = 0, long = 0, worst = 0, t0 = 0, last = 0, active = 0, probe = 0, sum = 0;
     const touch = () => { active = performance.now() + 300; };
@@ -1630,6 +1635,7 @@ window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
         }
         if (box && now - t0 > 500) {
             box.textContent = `${Math.round(frames * 1000 / (now - t0))} fps | long frames: ${long} | worst: ${Math.round(worst)}ms${root.classList.contains('lite') ? ' | LITE' : ''}`;
+            box.textContent += '\n' + buildLine();
             frames = long = worst = 0; t0 = now;
         }
         if (box || (!root.classList.contains('lite') && !q.has('nolite'))) requestAnimationFrame(tick);
@@ -1681,7 +1687,7 @@ window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
     }
 
     const nums = document.querySelectorAll('.stat-num');
-    if (!reduce && nums.length) {
+    if (!reduce && nums.length && matchMedia('(hover: hover) and (pointer: fine)').matches) {   // phones show the final numbers straight away
         const io = new IntersectionObserver(entries => entries.forEach(e => {
             if (!e.isIntersecting) return;
             io.unobserve(e.target);

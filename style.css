@@ -1425,3 +1425,14 @@ html.img-fade .item-image:not(.is-loaded), html.img-fade .item-image.is-error { 
     .item-image, .section-number { animation: none !important; }
     .about-quote blockquote .w { animation: none !important; opacity: 1 !important; }
 }
+
+
+:root { --km-build: '2026-11-12c'; }
+
+/* touch devices: fewer fixed full-screen layers and no scroll-timeline animations, the usual sources of flicker while the browser bars collapse */
+@media (hover: none), (pointer: coarse) {
+    .noise-overlay { display: none; }
+    .orb { animation: none; will-change: auto; }
+    .hero-canvas { contain: none; }
+    .hero-content, .header-progress { animation: none !important; }
+}
