@@ -162,14 +162,14 @@ const portfolioData = {
             title: "Human Void",
             description: "We are not our faces. We are the space around them. These portraits erase everything except presence itself — a shoulder, a silence, a shape where someone used to be. The body becomes architecture. The void becomes the story.",
             images: [
-                "HUMAN.png",
+                "HUMAN8.png",
                 "HUMAN2.png",
                 "HUMAN3.png",
                 "HUMAN4.png",
                 "HUMAN5.png",
                 "HUMAN6.png",
                 "HUMAN7.png",
-                "HUMAN8.png"
+                "HUMAN.png"
             ],
             date: "April 2026",
             category: "Human",
