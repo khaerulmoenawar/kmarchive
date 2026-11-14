@@ -1756,6 +1756,7 @@ window.KM_BUILD = '2026-11-12c';
     if (!reduce) {
         root.classList.add('hero-pre');
         setTimeout(() => root.classList.remove('hero-pre'), 7000);
+    }
     document.querySelectorAll('.hero-word').forEach(word => {
         const text = word.textContent.trim();
         word.textContent = '';
@@ -1778,5 +1779,5 @@ window.KM_BUILD = '2026-11-12c';
     };
     document.addEventListener('load', e => { const t = e.target; if (t && t.classList && t.classList.contains('item-image')) ready(t); }, true);
     document.addEventListener('error', e => { const t = e.target; if (t && t.classList && t.classList.contains('item-image')) ready(t, 'is-error'); }, true);
-    setTimeout(() => document.querySelectorAll('.item-image:not(.is-loaded)').forEach(i => ready(i)), 9000);   // safety net
+    setTimeout(() => document.querySelectorAll('.item-image:not(.is-loaded)').forEach(i => ready(i)), 9000);
 })();
