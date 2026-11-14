@@ -192,7 +192,7 @@ class Portfolio {
         this.audio.loop = true;
         this.isAudioPlaying = false;
         let saved = null; try { saved = localStorage.getItem('km-theme'); } catch (e) {}
-        this.isDark = saved ? saved === 'dark' : true;   // dark is the designed default
+        this.isDark = saved ? saved === 'dark' : true;
         this.finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
         this._pushed = false;
         this._lastFocus = null;
@@ -597,13 +597,11 @@ class Portfolio {
         setTimeout(() => this.openModal(it), 2600);
     }
 
-    // View Transitions are the heaviest effect. Use them only where they run smoothly.
     _vtOK() {
         return !!document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches
             && !document.documentElement.classList.contains('lite');
     }
 
-    // If a transition plays below ~30fps, switch to lite mode so later ones are skipped.
     _watchFrames(t) {
         t.ready.then(() => {
             let n = 0, sum = 0, last = performance.now();
@@ -735,15 +733,13 @@ class Portfolio {
 
     setupIntersectionObservers() {
         const sections = document.querySelectorAll('.gallery-section, .hero');
-    
-    // reveal: any overlap counts (a ratio threshold can never be reached by a section taller than the screen)
+
     const reveal = new IntersectionObserver(entries => entries.forEach(e => {
         if (!e.isIntersecting) return;
         e.target.classList.add('active');
         reveal.unobserve(e.target);
     }), { threshold: 0, rootMargin: '0px 0px -8% 0px' });
 
-    // nav highlight: the section crossing a thin band at mid-screen
     const spy = new IntersectionObserver(entries => entries.forEach(e => {
         if (!e.isIntersecting) return;
         document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${e.target.id}`));
@@ -1003,7 +999,6 @@ class Portfolio {
             const grid = document.querySelector(`.${cat}-gallery`);
             if (grid) grid.appendChild(frags[cat]);
         });
-        // replay the reveal, same as before
         requestAnimationFrame(() => setTimeout(() => {
             cards.forEach(card => card.classList.add('visible'));
         }, 60));
@@ -1138,7 +1133,7 @@ class Portfolio {
             if (ticking) return;
             requestAnimationFrame(() => {
                 const maxScroll = this._docH() - window.innerHeight;
-                const y = Math.min(Math.max(window.scrollY, 0), Math.max(maxScroll, 0));   // iOS rubber-banding reports positions outside the page
+                const y = Math.min(Math.max(window.scrollY, 0), Math.max(maxScroll, 0));
                 const pct = maxScroll > 0 ? (y / maxScroll) * 100 : 0;
 
                 header?.classList.toggle('scrolled', y > 60);
@@ -1175,7 +1170,6 @@ class Portfolio {
         const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
         const E = 'cubic-bezier(0.19, 1, 0.22, 1)';
         const show = { opacity: '1', transform: 'none' };
-        // animate from a hidden state, then commit the final look as plain styles and drop the animation
         const run = (el, from, to, delay, dur, final) => {
             if (!el) return;
             Object.assign(el.style, final);
@@ -1183,19 +1177,15 @@ class Portfolio {
             el.animate([from, to], { duration: dur, delay, easing: E, fill: 'backwards' });
         };
 
-        // 1. header settles in from above
         if (!reduce) document.querySelectorAll('.logo, .nav-link, .header-time').forEach((el, i) => {
             el.animate([{ opacity: 0, transform: 'translateY(-0.75rem)' }, { opacity: 1, transform: 'none' }], { duration: 900, delay: 60 + i * 70, easing: E, fill: 'backwards' });
         });
-        // 2. eyebrow: rule draws, text rises
         run(document.querySelector('.hero-eyebrow'), { opacity: 0, transform: 'translateY(1.25rem)' }, { opacity: 1, transform: 'none' }, 200, 800, show);
         const rule = document.querySelector('.eyebrow-line');
         if (rule && !reduce) rule.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 1100, delay: 250, easing: E, fill: 'backwards' });
-        // 3. title: letter by letter through the mask
         if (!reduce) document.querySelectorAll('.hero-word .ch').forEach((c, i) => {
             c.animate([{ transform: 'translateY(115%) rotate(5deg)' }, { transform: 'none' }], { duration: 1100, delay: 120 + i * 38, easing: E, fill: 'backwards' });
         });
-        // 4. supporting content follows
         run(document.querySelector('.hero-subtitle'), { opacity: 0, transform: 'translateY(1.25rem)' }, { opacity: 1, transform: 'none' }, 900, 1000, show);
         run(document.querySelector('.hero-cta'), { opacity: 0, transform: 'translateY(1.25rem)' }, { opacity: 1, transform: 'none' }, 1100, 800, show);
         run(document.querySelector('.hero-index'), { opacity: 0, transform: 'translateX(1.25rem)' }, { opacity: 1, transform: 'none' }, 1400, 1000, show);
@@ -1215,9 +1205,6 @@ if (window.innerWidth <= 768) {
     });
 }
 
-/* ============================================================
-   FULLSCREEN LIGHTBOX
-   ============================================================ */
 class Lightbox {
     constructor() {
         this.el       = document.getElementById('lightbox');
@@ -1231,7 +1218,6 @@ class Lightbox {
         this.index    = 0;
         this.isOpen   = false;
 
-        // Zoom / pan state
         this.scale    = 1;
         this.panX     = 0;
         this.panY     = 0;
@@ -1242,7 +1228,6 @@ class Lightbox {
         this.lastPanY = 0;
         this.zoomHintTimer = null;
 
-        // Touch
         this.touchStartX  = 0;
         this.touchStartY  = 0;
         this.touchLastDist = 0;
@@ -1252,15 +1237,12 @@ class Lightbox {
     }
 
     _bind() {
-        // Close buttons
         document.getElementById('lbClose')?.addEventListener('click', () => this.close());
         document.getElementById('lbBackdrop')?.addEventListener('click', () => this.close());
 
-        // Nav
         document.getElementById('lbPrev')?.addEventListener('click', () => this.navigate(-1));
         document.getElementById('lbNext')?.addEventListener('click', () => this.navigate(1));
 
-        // Keyboard
         document.addEventListener('keydown', e => {
             if (!this.isOpen) return;
             if (e.key === 'Escape')      this.close();
@@ -1271,7 +1253,6 @@ class Lightbox {
             if (e.key === '0')           this._resetZoom();
         });
 
-        // Mouse zoom (click to toggle)
         this.imgWrap.addEventListener('click', e => {
             if (this.isDragging) return;
             if (this.scale > 1) {
@@ -1281,14 +1262,12 @@ class Lightbox {
             }
         });
 
-        // Mouse wheel zoom
         this.imgWrap.addEventListener('wheel', e => {
             e.preventDefault();
             const delta = e.deltaY < 0 ? 0.18 : -0.18;
             this._zoomStep(delta, e.clientX, e.clientY);
         }, { passive: false });
 
-        // Mouse drag for panning
         this.imgWrap.addEventListener('mousedown', e => {
             if (this.scale <= 1) return;
             this.isDragging = true;
@@ -1307,13 +1286,11 @@ class Lightbox {
             setTimeout(() => { this.isDragging = false; }, 10);
         });
 
-        // Touch events
         this.el.addEventListener('touchstart', e => this._onTouchStart(e), { passive: false });
         this.el.addEventListener('touchmove',  e => this._onTouchMove(e),  { passive: false });
         this.el.addEventListener('touchend',   e => this._onTouchEnd(e),   { passive: false });
     }
 
-    // ── Public: open with an array of image srcs, start at index ──
     open(images, index, seriesTitle) {
         this.images      = images;
         this.index       = index;
@@ -1325,7 +1302,6 @@ class Lightbox {
         document.body.classList.add('lb-open');
         this.isOpen = true;
 
-        // Show mobile swipe hint once
         if (!this._swipeHintShown && window.innerWidth <= 768 && images.length > 1) {
             this._swipeHintShown = true;
             const hint = document.createElement('div');
@@ -1348,7 +1324,6 @@ class Lightbox {
         if (this.images.length <= 1) return;
         this._resetZoom(false);
 
-        // Slide-out animation
         const slideOut = dir > 0 ? '-60px' : '60px';
         this.img.style.transition = 'transform 0.22s ease, opacity 0.22s';
         this.img.style.transform  = `scale(0.94) translateX(${slideOut})`;
@@ -1357,7 +1332,6 @@ class Lightbox {
         setTimeout(() => {
             this.index = (this.index + dir + this.images.length) % this.images.length;
             this._load(this.index);
-            // Slide in from opposite
             this.img.style.transition = 'none';
             this.img.style.transform  = `scale(0.94) translateX(${dir > 0 ? '60px' : '-60px'})`;
             requestAnimationFrame(() => {
@@ -1376,18 +1350,15 @@ class Lightbox {
         this.title.textContent   = this.seriesTitle;
         this.counter.textContent = `${String(idx + 1).padStart(2,'0')} / ${String(this.images.length).padStart(2,'0')}`;
 
-        // Show prev/next only if multiple images
         const showNav = this.images.length > 1;
         document.getElementById('lbPrev').style.display = showNav ? '' : 'none';
         document.getElementById('lbNext').style.display = showNav ? '' : 'none';
     }
 
-    // ── Zoom helpers ──
     _zoomStep(delta, cx, cy) {
         const newScale = Math.min(Math.max(this.scale + delta, 1), 5);
         if (newScale === this.scale) return;
         if (cx !== undefined) {
-            // Zoom toward cursor
             const rect = this.img.getBoundingClientRect();
             const ox = cx - (rect.left + rect.width  / 2);
             const oy = cy - (rect.top  + rect.height / 2);
@@ -1416,7 +1387,6 @@ class Lightbox {
     _resetZoom(animate = true) {
         this.scale = 1; this.panX = 0; this.panY = 0;
         this.imgWrap.classList.remove('lb-zoomed');
-        // Let CSS handle the transition when animate=true
         if (!animate) {
             this.imgWrap.style.transition = 'none';
             this.imgWrap.style.transform  = 'translate(0,0) scale(1)';
@@ -1427,7 +1397,7 @@ class Lightbox {
     }
 
     _applyTransform(smooth) {
-        if (this.scale > 1) {            // keep the zoomed photo inside reach: its top and bottom edges can always be panned into view
+        if (this.scale > 1) {
             const w = this.img.offsetWidth * this.scale, h = this.img.offsetHeight * this.scale;
             const mx = Math.max(0, (w - innerWidth) / 2), my = Math.max(0, (h - innerHeight) / 2);
             this.panX = Math.min(Math.max(this.panX, -mx), mx);
@@ -1449,7 +1419,6 @@ class Lightbox {
         }, 1200);
     }
 
-    // ── Touch ──
     _onTouchStart(e) {
         if (e.touches.length === 2) {
             this.touchPinching  = true;
@@ -1509,8 +1478,6 @@ class Lightbox {
         };
     }
 }
-
-// ── Wire up Lightbox to the Portfolio modal image ──
 document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('lightbox')) {
         const X = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">';
@@ -1526,40 +1493,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const lb = new Lightbox();
 
-    // Hook: whenever the modal image is clicked, open lightbox
     document.getElementById('modalImage')?.addEventListener('click', () => {
-        // Find which item is currently in the modal via the global Portfolio instance
         const modal = document.getElementById('detailModal');
         if (!modal.classList.contains('active')) return;
 
-        // Collect images from the currently active thumbnail gallery
         const thumbs = Array.from(document.querySelectorAll('.modal-gallery-item img'));
         const images = thumbs.length
             ? thumbs.map(img => img.src)
             : [document.getElementById('modalImage').src];
 
-        // Find which thumbnail is active = current index
         const activeThumb = document.querySelector('.modal-gallery-item.active img');
         const currentSrc  = document.getElementById('modalImage').src;
         let startIdx = images.findIndex(s => s === currentSrc);
         if (startIdx < 0) startIdx = 0;
 
-        // Get series title from modal
         const seriesTitle = document.getElementById('modalTitle')?.textContent || '';
         lb.open(images, startIdx, seriesTitle);
     });
 
-    // Also wire gallery thumbnails — clicking a thumb then clicking the main image should be in sync
-    // We re-use the existing thumbnail click logic — no changes needed there.
-
-    // Expose lb globally so Portfolio can call lb.open() directly if needed
     window._km_lightbox = lb;
 });
 
 
-/* ============================================================
-   ICONS: inline SVG, swaps <i class="fas fa-*"> automatically
-   ============================================================ */
 (() => {
     const F = 'fill="currentColor"';
     const P = {
@@ -1595,15 +1550,8 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 
-/* ============================================================
-   DIAGNOSTICS + ADAPTIVE QUALITY
-   ?perf            live fps / long-frame readout
-   ?fx=-glow,-tilt  switch single effects off (canvas, glow, tilt, cta)
-   ?nolite          never auto-switch to lite mode
-   Lite mode only turns on if frames stay slow while you scroll or move the mouse.
-   ============================================================ */
 window.KM_FX = { canvas: true, glow: true, tilt: true, cta: true };
-window.KM_BUILD = '2026-11-12c';   // shown by ?perf, so you can check that the deployed JS and CSS match
+window.KM_BUILD = '2026-11-12c';
 (() => {
     const q = new URLSearchParams(location.search);
     (q.get('fx') || '').split(',').forEach(t => { if (t[0] === '-' && t.slice(1) in KM_FX) KM_FX[t.slice(1)] = false; });
@@ -1643,9 +1591,6 @@ window.KM_BUILD = '2026-11-12c';   // shown by ?perf, so you can check that the 
 })();
 
 
-/* ============================================================
-   TYPOGRAPHY MOTION: kinetic titles, scroll-read quote, count-up numbers
-   ============================================================ */
 (() => {
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const sr = (el, text) => {
@@ -1686,12 +1631,12 @@ window.KM_BUILD = '2026-11-12c';   // shown by ?perf, so you can check that the 
     }
 
     const nums = document.querySelectorAll('.stat-num');
-    if (!reduce && nums.length && matchMedia('(hover: hover) and (pointer: fine)').matches) {   // phones show the final numbers straight away
+    if (!reduce && nums.length && matchMedia('(hover: hover) and (pointer: fine)').matches) {
         const io = new IntersectionObserver(entries => entries.forEach(e => {
             if (!e.isIntersecting) return;
             io.unobserve(e.target);
             const el = e.target, to = parseInt(el.textContent, 10);
-            if (isNaN(to) || to > 100) return;   // years and big numbers stay still; only small counts animate
+            if (isNaN(to) || to > 100) return;
             const from = to > 100 ? to - 60 : 0, t0 = performance.now();
             const run = now => {
                 const p = Math.min((now - t0) / 1800, 1);
@@ -1704,11 +1649,6 @@ window.KM_BUILD = '2026-11-12c';   // shown by ?perf, so you can check that the 
     }
 })();
 
-
-/* ============================================================
-   SEARCH PALETTE  ( / or Ctrl+K, or the search button )
-   Built on first use, so it costs nothing at load.
-   ============================================================ */
 (() => {
     let root = null, input = null, list = null, items = [], active = 0, hay = null, last = null;
     const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1791,9 +1731,6 @@ window.KM_BUILD = '2026-11-12c';   // shown by ?perf, so you can check that the 
 })();
 
 
-/* ============================================================
-   DOCUMENT STRUCTURE (accessibility + SEO fallbacks; real <main> and <meta> in the HTML are better)
-   ============================================================ */
 (() => {
     document.querySelectorAll('.gallery-grid[role="list"]').forEach(g => g.removeAttribute('role'));
     const hero = document.querySelector('.hero');
@@ -1813,16 +1750,12 @@ window.KM_BUILD = '2026-11-12c';   // shown by ?perf, so you can check that the 
 })();
 
 
-/* ============================================================
-   OPENING SEQUENCE SETUP + IMAGE FADE-IN
-   ============================================================ */
 (() => {
     const root = document.documentElement;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reduce) {
         root.classList.add('hero-pre');
-        setTimeout(() => root.classList.remove('hero-pre'), 7000);   // safety: never leave the header hidden
-    }
+        setTimeout(() => root.classList.remove('hero-pre'), 7000);
     document.querySelectorAll('.hero-word').forEach(word => {
         const text = word.textContent.trim();
         word.textContent = '';
@@ -1837,7 +1770,6 @@ window.KM_BUILD = '2026-11-12c';   // shown by ?perf, so you can check that the 
         word.style.opacity = '1'; word.style.transform = 'none'; word.style.willChange = 'auto';
     });
 
-    // photos fade in when they arrive instead of popping; a skeleton holds their space meanwhile
     root.classList.add('img-fade');
     const ready = (img, cls) => {
         img.classList.add('is-loaded');
